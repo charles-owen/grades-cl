@@ -1,0 +1,24 @@
+{
+  "name" : "cl/grades",
+  "description": "CourseLib grading and gradebook component.",
+  "type" : "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Charles B. Owen",
+      "email": "cbowen@msu.edu"
+    }
+  ],
+  "autoload":{
+    "psr-4": {
+      "CL\\Users\\": "src/Grades"
+    }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/charles-owen/grades-cl.git"
+    }
+  ]
+}
+
