@@ -6,7 +6,6 @@
 
 namespace CL\Grades;
 
-use CL\Course\Assignments\GradedAssignmentFactory;
 use CL\Site\Site;
 use CL\Site\System\Server;
 

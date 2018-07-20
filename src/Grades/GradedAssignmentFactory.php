@@ -4,7 +4,7 @@
  * Factory class that creates assignment components.
  */
 
-namespace CL\Course\Assignments;
+namespace CL\Grades;
 
 use CL\Course\Assignments\AssignmentFactory;
 
