@@ -29,7 +29,7 @@ abstract class Grade {
 	/**
 	 * Get properties for this component
 	 * @param string $key Name of the property
-	 * @returns Set value
+	 * @returns mixed Set value
 	 */
 	public function _get($key) {
 		switch($key) {
@@ -130,5 +130,4 @@ abstract class Grade {
 	protected $points;	///< Number of points for this category
 	protected $tag;		///< Grading category tag
 	private $grade = null;	// Computed or supplied grade
-
 }

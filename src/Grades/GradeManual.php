@@ -5,7 +5,8 @@
 
 namespace CL\Grades;
 
-/** Manually entered grades
+/**
+ * Manually entered grades
  */
 class GradeManual extends Grade {
 

@@ -51,8 +51,8 @@ SQL;
 	/**
 	 * Get a grade for user/assignment/gradetag.
 	 * @param User $user User we are getting the grade for, must have a course membership.
-	 * @param $assignTag Assignment tag
-	 * @param $gradeTag Grade tag
+	 * @param string $assignTag Assignment tag
+	 * @param string $gradeTag Grade tag
 	 * @return array with the keys 'grade' and 'metadata'
 	 */
 	public function get(User $user, $assignTag, $gradeTag) {

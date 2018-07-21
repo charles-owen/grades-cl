@@ -49,7 +49,7 @@ class GradesPlugin extends \CL\Site\Components\Plugin {
 		// Ensure tables exist
 		// TODO: Ensure grading tables exist
 
-		$site->course->assignmentFactory = new GradedAssignmentFactory();
+		$site->course->addAssignmentExtender(new GradingAssignmentExtender());
 	}
 
 }
