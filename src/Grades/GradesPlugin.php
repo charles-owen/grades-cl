@@ -8,12 +8,14 @@ namespace CL\Grades;
 
 use CL\Site\Site;
 use CL\Site\System\Server;
+use CL\Course\Assignments\AssignmentCategory;
+use CL\Course\Assignment;
 
 
 /**
  * Plugin class for the Grades/Gradebook Subsystem
  */
-class GradesPlugin extends \CL\Site\Components\Plugin {
+class GradesPlugin extends \CL\Site\Plugin {
 	/**
 	 * A tag that represents this plugin
 	 * @return string A tag like 'course', 'users', etc.
@@ -30,26 +32,33 @@ class GradesPlugin extends \CL\Site\Components\Plugin {
 	 * Install the plugin
 	 * @param Site $site The Site configuration object
 	 */
-	public function install(Site $site)
-	{
-		$site->addPreStartup(function (Site $site, Server $server, $time) {
-			return $this->preStartup($site, $server, $time);
-		});
+	public function install(Site $site) {
+	}
+
+
+	/**
+	 * AssignmentCategory and Assignment are extended with
+	 * the grading components.
+	 * @param Site $site The site configuration component
+	 */
+	public function ensureTables(Site $site) {
+		$maker = new GradesTables($site->db);
+		$maker->create(false);
 	}
 
 	/**
-	 * Called before we start up.
-	 * @param Site $site
-	 * @param Server $server
-	 * @param int $time Current time
-	 * @return null|string redirect page.
+	 * Amend existing object
+	 * The Router is amended with routes for the login page
+	 * and for the user API.
+	 * @param $object Object to amend.
 	 */
-	public function preStartup(Site $site, Server $server, $time)
-	{
-		// Ensure tables exist
-		// TODO: Ensure grading tables exist
-
-		$site->course->addAssignmentExtender(new GradingAssignmentExtender());
+	public function amend($object) {
+		if($object instanceof Assignment) {
+			$object->grading = new AssignmentGrading();
+		} else if($object instanceof AssignmentCategory) {
+			$object->grading = new CategoryGrading();
+		}
 	}
+
 
 }
