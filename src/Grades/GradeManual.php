@@ -11,7 +11,6 @@ namespace CL\Grades;
 class GradeManual extends Grade {
 
 	/** Constructor
-	 * @param $grading The Assignment Grading object this is a member of
 	 * \param $points The maximum possible points for this category
 	 * \param $tag The category tag
 	 * \param $name A category name for display */

@@ -8,7 +8,7 @@ namespace CL\Grades;
 
 use CL\Site\Site;
 use CL\Site\System\Server;
-use CL\Course\Assignments\AssignmentCategory;
+use CL\Course\AssignmentCategory;
 use CL\Course\Assignment;
 
 

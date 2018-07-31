@@ -86,9 +86,10 @@ SQL;
 	 * @param User $user The user we are grading, must have a course membership
 	 * @param User $grader The grader, can be null is grade is automatic.
 	 * @param string $assignTag The assignment tag
-	 * @param string $gradetag The grade tag
+	 * @param string $gradeTag The grade tag
 	 * @param null|int $grade Grade to post. Can be null.
 	 * @param mixed $data Data to associated with the grade.
+	 * @param int $time Current time
 	 * @return true if successful
 	 */
 	public function post(User $user, User $grader=null, $assignTag, $gradeTag, $grade, $data, $time) {

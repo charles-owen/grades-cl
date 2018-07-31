@@ -90,9 +90,9 @@ class AssignmentGrading {
 
 
 //    /** Add a quizzes grading category
-//     * @param $points Number of points to allocate to all quizzes
-//     * @param $tags Array of tag  => points for the quizzes this category includes
-//     * @return GradeQuizzes object
+//     * @ param $points Number of points to allocate to all quizzes
+//     * @ param $tags Array of tag  => points for the quizzes this category includes
+//     * @ return GradeQuizzes object
 //     */
 //    public function add_quizzes($points, array $tags) {
 //        return $this->add(new \Quiz\GradeQuizzes($this, $points, $tags));
@@ -114,7 +114,7 @@ class AssignmentGrading {
 //     * Only valid for Step assignments!
 //     * Only 1 allowed
 //     *
-//     * @param $points Number of points to allocate to all quizzes
+//     * @ param $points Number of points to allocate to all quizzes
 //     * @return GradeQuizzes object
 //     */
 //	public function add_step_quizzes($points) {
@@ -133,12 +133,14 @@ class AssignmentGrading {
 //	}
 
 //	/** Add course Handbook grading to an assignment
-//	 * @param $multiplier Amount the deductions are multiplied by */
+//	 * @ param $multiplier Amount the deductions are multiplied by */
 //	public function add_handbook($multiplier) {
 //		return $this->add(new GradeHandbook($this, $multiplier));
 //	}
 
-	/** Add the override grading category */
+	/**
+	 * Add the override grading category
+	 */
 	public function add_override() {
 		return $this->add(new GradeOverride());
 	}
