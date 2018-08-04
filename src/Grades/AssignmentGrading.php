@@ -145,62 +145,7 @@ class AssignmentGrading {
 		return $this->add(new GradeOverride());
 	}
 
-//	/** Add a submission object to this assignment
-//	 * @param $tag Assignment tag
-//	 * @param $submission The Submission object
-//	 * @returns Submission object */
-//	public function add_submission($tag, Submission $submission) {
-//		$this->submissions[$tag] = $submission;
-//		return $submission;
-//	}
-//
-//	/**
-//	 * Add a submission of type Program to this assignment
-//	 * @param $tag Assignment tag
-//	 * @param $name Assignment name
-//	 * @param $teaming Teaming name if this is a team submission
-//	 * @returns Submission object */
-//	public function add_submission_program($tag, $name, $teaming=null) {
-//        return $this->add_submission($tag,
-//            new SubmissionProgram($this->assignment, $tag, $name, $teaming));
-//	}
-//
-//	/**
-//	 * Add a submission of type Text to this assignment
-//	 * @param $tag Assignment tag
-//	 * @param $name Assignment name
-//	 * @param $teaming Teaming name if this is a team submission
-//	 * @returns Submission object */
-//	public function add_submission_text($tag, $name, $teaming=null) {
-//		return $this->add_submission($tag,
-//			new SubmissionText($this->assignment, $tag, $name, $teaming));
-//	}
-//
-//	/** Add a submission of type Image to this assignment
-//	 * @param $tag Assignment tag
-//	 * @param $name Assignment name
-//	 * @param $teaming Teaming name if this is a team submission
-//	 * @returns Submission object */
-//	public function add_submission_image($tag, $name, $teaming=null) {
-//        return $this->add_submission($tag,
-//            new SubmissionImage($this->assignment, $tag, $name, $teaming));
-//	}
-//
-//	/** Get the submissions for this assignment
-//	 * @return Submission
-//	 */
-//	public function get_submissions() {return $this->submissions;}
-//
-//	/** Get a submission object
-//	 * @param $tag Submission tag
-//	 * @returns Submission object or null if invalid tag */
-//	public function get_submission($tag) {
-//		if(!isset($this->submissions[$tag])) {
-//			return null;
-//		}
-//
-//		return $this->submissions[$tag];
-//	}
+
 //
 //	/** \brief Clear all points for all grading categories
 //	 *
@@ -593,7 +538,4 @@ class AssignmentGrading {
 	private $assignment;		        ///< Assignment the grades are for
 
 	private $grades = array();	        ///< The Grade objects for the assignment
-	private $submissions = array();	// Any submissions for the assignment
-
-	private $recentSubmissions = array();	// Recent submission ID's
 }
