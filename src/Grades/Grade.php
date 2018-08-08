@@ -1,72 +1,122 @@
 <?php
-/** @file
- * Base class for a grade for assignments 
+/**
+ * @file
+ * Represents a single grade value in the system.
  */
 
 namespace CL\Grades;
 
+use CL\Site\MetaData;
+use CL\Site\MetaDataOwner;
+use CL\Site\Site;
+use CL\Users\User;
+
 /**
- * Base class for an assignment grade.
- * 
- * Derived classes will specialize this for specific categories
+ * Represents a single grade value in the system.
+ *
+ * Objects of this type correspond to a single row in the grade table (Grades class)
+ *
+ * @cond
+ * @property string assignTag
+ * @property string comment
+ * @property int grade
+ * @property string gradeTag
+ * @property MetaData meta
+ * @property MetaData metaData
+ * @endcond
  */
-abstract class Grade {
+class Grade implements MetaDataOwner {
 	/// Metadata key for the grading history
 	const HISTORY = 'history';
 
-	/// Metadata key for the grade data
-	const DATA = 'data';
-
-	/** Constructor 
-	 * @param int $points Number of points allocated to this grade.
-	 * @param string $tag Tag that identifies this grade within the category.
+	/**
+	 * Grade constructor.
+	 * @param string $assignTag Assignment tag
+	 * @param string $gradeTag Grade tag
+	 * @param array $row Database table row
 	 */
-	public function __construct($points, $tag) {
-		$this->points = $points;
-		$this->tag = $tag;
+	public function __construct($assignTag, $gradeTag, $row = null) {
+		$this->assignTag = $assignTag;
+		$this->gradeTag = $gradeTag;
+
+		if($row !== null) {
+			$this->comment = $row['comment'];
+			$this->points = $row['points'] !== null ? +$row['points'] : null;
+			if(!empty($row['metadata'])) {
+				$this->metaData = new MetaData($this, $row['metadata']);
+			}
+		}
+
+		if($this->metaData === null) {
+			$this->metaData = new MetaData($this);
+		}
 	}
 
 	/**
-	 * Get properties for this component
-	 * @param string $key Name of the property
-	 * @returns mixed Set value
+	 * Property get magic method
+	 *
+	 * <b>Properties</b>
+	 * Property | Type | Description
+	 * -------- | ---- | -----------
+	 * assignTag | string | Assignment tag
+	 * comment | string | Grading comment
+	 * grade | int | Grade value or null if none
+	 * gradeTag | string | Grade tag
+	 * meta | MetaData | Meta-data for this grade (short version)
+	 * metaData | MetaData | Meta-data for this grade
+	 *
+	 * @param string $property Property name
+	 * @return mixed
 	 */
-	public function _get($key) {
-		switch($key) {
-			case 'name':
-				return $this->name;
+	public function __get($property) {
+		switch($property) {
+			case 'assignTag':
+				return $this->assignTag;
+
+			case 'comment':
+				return $this->comment;
 
 			case 'points':
 				return $this->points;
 
 			case 'tag':
-				return $this->tag;
+			case 'gradeTag':
+				return $this->gradeTag;
+
+			case 'metaData':
+			case 'meta':
+				return $this->metaData;
 
 			default:
 				$trace = debug_backtrace();
 				trigger_error(
-					'Undefined property ' . $key .
+					'Undefined property ' . $property .
 					' in ' . $trace[0]['file'] .
 					' on line ' . $trace[0]['line'],
 					E_USER_NOTICE);
 				return null;
 		}
 	}
+
+
 	/**
-	 * Set properties for this component
-	 * @param $key Name of the property
-	 * @param $value Value to set
+	 * Property set magic method
+	 *
+	 * <b>Properties</b>
+	 * Property | Type | Description
+	 * -------- | ---- | -----------
+	 *
+	 * @param string $property Property name
+	 * @param mixed $value Value to set
 	 */
-	public function _set($key, $value) {
-		switch($key) {
-			case 'name':
-				$this->name = $value;
-				break;
+	public function __set($property, $value) {
+		switch($property) {
+
 
 			default:
 				$trace = debug_backtrace();
 				trigger_error(
-					'Undefined property ' . $key .
+					'Undefined property ' . $property .
 					' in ' . $trace[0]['file'] .
 					' on line ' . $trace[0]['line'],
 					E_USER_NOTICE);
@@ -74,60 +124,54 @@ abstract class Grade {
 		}
 	}
 
+	/**
+	 * Set the grade for a user.
+	 *
+	 * This records the history of grade changes if the grade or comment is changed.
+	 *
+	 * @param User $grader User doing the grading
+	 * @param int $grade New grade value
+	 * @param string $comment Comment associated with the grade (can be null)
+	 * @param int $time	Timestamp for the grade
+	 * @return true if the grade has changed
+	 */
+	public function set(User $grader, $grade, $comment, $time) {
+		if($grade === $this->points && $comment === $this->comment) {
+			return false;
+		}
+
+		$history = $this->metaData->get('public', Grade::HISTORY, []);
+		$history[] = ['grader'=>$grader->member->id,
+			'fm-grade'=>$this->points, 'fm-comment'=>$this->comment,
+			'to-grade'=>$grade, 'to-comment'=>$comment,
+			'time'=>$time];
+		$this->metaData->set('public', Grade::HISTORY, $history);
+
+		$this->points = $grade;
+		$this->comment = $comment;
+		return true;
+	}
 
 	/**
-	 * Present the grading form for staff use.
-	 * @param $user User we are grading
-	 * @return string HTML
+	 * Get all grade history
+	 * @return array of history items
 	 */
-	public function grading_form(\User $user) {
-		$html = '';
-		if($this->name !== null) {
-			$html .= "<h2>$this->name</h2>";
-		}
-
-		if($this->extra !== null) {
-			$html .= $this->extra->present($user);
-		}
-
-		return $html;
-	}
-	
-	/** Present the grading form for user information purposes */
-	abstract public function graded_form();
-	
-	/** Handle POST data from the grading form for this grading category 
-	 * @param $user User we are grading */
-	abstract public function post_form(\User $user);
-	
-	/** The computed or entered grade for this category.
-	 *
-	 * Must be called after grading_form(), graded_form(), or post_form()
-	 * since those functions set the grade after reading it from the 
-	 * database or getting it from POST data. */
-	public function get_grade() {return $this->grade;}
-	
-	/** Set the grade for this category. 
-	 * @param $grade Grade to set */
-	protected function set_grade($grade) { $this->grade = $grade; }
-	
-	/** Load the grade information from the database row */
-	public function load_grade($row) {}
-	
-	/** Clear the grade information */
-	public function clear_grade() {
-		$this->grade = null;
+	public function getHistory() {
+		return $this->metaData->get('public', Grade::HISTORY, []);
 	}
 
-	
-	/** If true, this is an override grade */
-	public function is_override() {return false;}
+	/**
+	 * Write the meta-data for this user.
+	 * @param Site $site Site object so we can access tables.
+	 * @throws \Exception This feature is not supported for the Grade class.
+	 */
+	public function writeMetaData(Site $site) {
+		throw new \Exception('Not supported');
+	}
 
-	/** Optional auxiliary view associated with a grade */
-	public function get_view_aux() {return null;}
-
-	private $name = null;    // Name of the grading category
-	protected $points;	///< Number of points for this category
-	protected $tag;		///< Grading category tag
-	private $grade = null;	// Computed or supplied grade
+	private $assignTag;
+	private $gradeTag;
+	private $points = null;
+	private $comment = null;
+	private $metaData = null;
 }

@@ -2,9 +2,11 @@
 /** @file
  * Class for the grade table
  */
- 
+
+
 namespace CL\Grades;
 
+use CL\Tables\Table;
 use CL\Users\User;
 use CL\Site\MetaData;
 use CL\Course\Members;
@@ -15,7 +17,7 @@ use CL\Users\Users;
  *
  * This class represents the grades table that stores the 
  * assignment grades. */
-class Grades extends \CL\Tables\Table {
+class Grades extends Table {
 
 	/**
 	 * Grades constructor.
@@ -30,7 +32,7 @@ class Grades extends \CL\Tables\Table {
 	 *
 	 * Function to create an SQL create table command
 	 * for the grades table
-	 * @returns SQL
+	 * @returns string SQL
 	 */
 	public function createSQL() {
 		$query = <<<SQL
@@ -38,11 +40,13 @@ CREATE TABLE IF NOT EXISTS `$this->tablename` (
   memberid  int(11) NOT NULL, 
   assigntag varchar(30) NOT NULL, 
   gradetag  varchar(30) NOT NULL, 
-  grade     int(11), 
+  points    int(11), 
+  comment   mediumtext, 
   metadata  mediumtext, 
   PRIMARY KEY (memberid, 
   assigntag, 
   gradetag));
+);
 SQL;
 
 		return $query;
@@ -53,11 +57,11 @@ SQL;
 	 * @param User $user User we are getting the grade for, must have a course membership.
 	 * @param string $assignTag Assignment tag
 	 * @param string $gradeTag Grade tag
-	 * @return array with the keys 'grade' and 'metadata'
+	 * @return Grade object
 	 */
 	public function get(User $user, $assignTag, $gradeTag) {
 		$sql = <<<SQL
-select grade, metadata
+select points, comment, metadata
 from $this->tablename
 where memberid=? and assigntag=? and gradetag=?
 SQL;
@@ -68,73 +72,47 @@ SQL;
 			$stmt->execute([$user->member->id, $assignTag, $gradeTag]);
 			$row = $stmt->fetch(\PDO::FETCH_ASSOC);
 			if($row) {
-				return ['grade'=>$row['grade'], 'metadata'=>new MetaData(null, $row['metadata'])];
+				return new Grade($assignTag, $gradeTag, $row);
 			} else {
-				return ['grade'=>null, 'metadata'=>new MetaData()];
+				return new Grade($assignTag, $gradeTag);
 			}
 		} catch(\PDOException $e) {
-			return ['grade'=>null, 'metadata'=>new MetaData()];
+			return new Grade($assignTag, $gradeTag);
 		}
 	}
 
 	/**
-	 * Insert a record into the grades table
-	 *
-	 * The data associated with the grade goes into meta-data and can
-	 * be strings as in comments or arrays for more complex data.
-	 *
-	 * @param User $user The user we are grading, must have a course membership
-	 * @param User $grader The grader, can be null is grade is automatic.
-	 * @param string $assignTag The assignment tag
-	 * @param string $gradeTag The grade tag
-	 * @param null|int $grade Grade to post. Can be null.
-	 * @param mixed $data Data to associated with the grade.
-	 * @param int $time Current time
-	 * @return true if successful
+	 * Post a grade in the grade table.
+	 * @param User $user User we are posting for
+	 * @param Grade $grade Grade we are posting
+	 * @return bool true if successful
 	 */
-	public function post(User $user, User $grader=null, $assignTag, $gradeTag, $grade, $data, $time) {
-		// Get any existing grade
-		$existing = $this->get($user, $assignTag, $gradeTag);
-		$meta = $existing['metadata'];
-
-		// Set the comment
-		$meta->set('public', Grade::DATA, $data);
-
-		// Add the grading history
-		$history = $meta->get('public', Grade::HISTORY, []);
-		if($grader !== null) {
-			$history[] = ['grader'=>$grader->member->id, 'time'=>$time];
-		} else {
-			$history[] = ['grader'=>null, 'time'=>$time];
-		}
-		$meta->set('public', Grade::HISTORY, $history);
-
+	public function post(User $user, Grade $grade) {
 		$sql = <<<SQL
-replace into $this->tablename(memberid, assigntag, gradetag, grade, metadata) 
-values(?, ?, ?, ?, ?)
+replace into $this->tablename(memberid, assigntag, gradetag, points, comment, metadata) 
+values(?, ?, ?, ?, ?, ?)
 SQL;
 
 		$pdo = $this->pdo;
 		try {
 			$stmt = $pdo->prepare($sql);
-			return $stmt->execute([$user->member->id, $assignTag, $gradeTag, $grade, $meta->json()]);
+			return $stmt->execute([$user->member->id, $grade->assignTag, $grade->gradeTag,
+				$grade->points, $grade->comment, $grade->meta->json()]);
 		} catch(\PDOException $e) {
 			return false;
 		}
-
-		return true;
 	}
 
 
 	/**
 	 * Get all grades for a user/assignment.
 	 * @param User $user User we are getting the grade for, must have a course membership.
-	 * @param $assignTag Assignment tag
-	 * @return array with the keys 'gradetag', 'grade' and 'metadata'
+	 * @param string $assignTag Assignment tag
+	 * @return array of Grade objects with key gradeTag
 	 */
 	public function getUserGrades(User $user, $assignTag) {
 		$sql = <<<SQL
-select grade, gradetag, metadata
+select points, gradetag, comment, metadata
 from $this->tablename
 where memberid=? and assigntag=?
 SQL;
@@ -145,26 +123,23 @@ SQL;
 			$stmt->execute([$user->member->id, $assignTag]);
 			$ret = [];
 			foreach($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-				$ret[] = ['gradetag'=>$row['gradetag'],
-					'grade'=>$row['grade'],
-					'metadata'=>new MetaData(null, $row['metadata'])];
+				$ret[$row['gradetag']] = new Grade($assignTag, $row['gradetag'], $row);
 			}
 
 			return $ret;
 		} catch(\PDOException $e) {
-			return ['grade'=>null, 'metadata'=>new MetaData()];
+			return [];
 		}
 	}
 
 	/**
-	 * Get members with options
+	 * Get member grades with options
 	 *
-	 * Notice: Does not load the user metadata by default. Add 'metadata'=>true to the parameter to
-	 * also load metadata.
+	 * @param array $params Parameters for the search query.
+	 * @return array of arrays, each with keys 'member' and 'grade'
 	 */
 	public function query($params = []) {
 		$membersTable = new Members($this->config);
-		$usersTable = new Users($this->config);
 
 		$where = new \CL\Tables\TableWhere($this);
 
@@ -196,22 +171,16 @@ SQL;
 			$where->append('grade.gradetag=?', $params['gradeTag']);
 		}
 
-		$meta = isset($params['metadata']) && $params['metadata'] ?
-			', user.metadata as user_metadata, member.metadata as member_metadata' : '';
-
 		$sql = <<<SQL
-select user.id as user_id, user.user as user_user, user.email as user_email,
-user.name as user_name, user.role as user_role, user.created as user_created, 
-member.id as member_id, member.userid as member_userid, member.semester as member_semester,
-member.section as member_section, member.role as member_role, member.created as member_created$meta,
-grade.assigntag as assigntag, grade.gradetag as gradetag, grade.grade as grade, grade.metadata as metadata
+select member.id as member_id, member.userid as member_userid, member.semester as member_semester,
+member.section as member_section, member.role as member_role, member.created as member_created,
+grade.assigntag as assigntag, grade.gradetag as gradetag, grade.points as points, grade.comment as comment, 
+grade.metadata as metadata
 from $membersTable->tablename member
-join $usersTable->tablename user
-on member.userid = user.id
 join $this->tablename grade
 on member.id = grade.memberid
 $where->where
-order by `name`, user.id
+order by member.id, assigntag, gradetag 
 SQL;
 
 		if(isset($params['limit'])) {
@@ -228,15 +197,10 @@ SQL;
 		$result = $where->execute($sql);
 		$ret = [];
 		foreach($result->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-			$user = new User($row);
 			$member = new Member($row);
-			$user->member = $member;
+			$grade = new Grade($row['assigntag'], $row['gradetag'], $row);
 
-			$ret[] = ['user'=>$user,
-				'assigntag'=>$row['assigntag'],
-				'gradetag'=>$row['gradetag'],
-				'grade'=>$row['grade'],
-				'metadata'=>new MetaData(null, $row['metadata'])];
+			$ret[] = ['member'=>$member, 'grade'=>$grade];
 		}
 
 		return $ret;

@@ -6,11 +6,12 @@
 
 namespace CL\Grades;
 
+use CL\Console\ConsoleView;
 use CL\Site\Site;
 use CL\Site\System\Server;
 use CL\Course\AssignmentCategory;
 use CL\Course\Assignment;
-
+use CL\Site\Router;
 
 /**
  * Plugin class for the Grades/Gradebook Subsystem
@@ -53,12 +54,24 @@ class GradesPlugin extends \CL\Site\Plugin {
 	 * @param $object Object to amend.
 	 */
 	public function amend($object) {
-		if($object instanceof Assignment) {
+		if($object instanceof Router) {
+			$router = $object;
+
+			$router->addRoute(['grade', ':assigntag'], function(Site $site, Server $server, array $params, array $properties, $time) {
+				$view = new GradeView($site, $server, $properties);
+				return $view->vue();
+			});
+
+			$router->addRoute(['api', 'grade', '*'], function(Site $site, Server $server, array $params, array $properties, $time) {
+				$resource = new GradesApi();
+				return $resource->apiDispatch($site, $server, $params, $properties, $time);
+			});
+		} else if($object instanceof Assignment) {
 			$object->grading = new AssignmentGrading();
 		} else if($object instanceof AssignmentCategory) {
 			$object->grading = new CategoryGrading();
+		} else if($object instanceof ConsoleView) {
+			$object->addJS('grades');
 		}
 	}
-
-
 }

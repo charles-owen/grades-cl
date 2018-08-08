@@ -1,0 +1,91 @@
+@import '~site-cl/sass/modules/colors';
+
+div.cl-grader {
+
+  p.title {
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+
+  p.cl-role {
+    text-align: center;
+  }
+
+  p.cl-role-staff {
+    color: $comp;
+  }
+
+  p.cl-due {
+    text-align: center;
+    font-style: italic;
+    font-weight: normal;
+    color: $comp;
+  }
+
+  div.grader {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+
+    label, div.label {
+      font-style: italic;
+    }
+
+    div.comment {
+      flex: 1 1 auto;
+      padding: 0 20px 0 0;
+
+      textarea {
+        display: block;
+        width: 100%;
+      }
+
+      div.comment {
+        @extend %shadow;
+        white-space: pre;
+        background: #f0f0f0;
+        font-style: normal;
+        border: 1px solid #a9a9a9;
+        height: 120px;
+        overflow: auto;
+        padding: 2px;
+      }
+    }
+
+    div.points {
+      flex: 0 1 auto;
+      width: 5em;
+      text-align: center;
+      padding: 45px 5px 0 0;
+
+      input, div.value {
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-style: normal;
+        font-weight: bold;
+      }
+
+      span.not {
+        font-size: 0.8em;
+        font-style: italic;
+      }
+    }
+
+  }
+
+  textarea {
+    background: #f0f0f0;
+    font-style: normal;
+  }
+
+  div.grade {
+    border-top: 1px solid black;
+
+    p:first-child {
+      text-align: center;
+      font-size: 1.2em;
+    }
+  }
+}

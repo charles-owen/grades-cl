@@ -5,7 +5,7 @@
 
 namespace CL\Grades;
 
-
+use CL\Users\User;
 
 /**
  * Management of assignment grades
@@ -67,11 +67,11 @@ class AssignmentGrading {
 		
 	/**
 	 * Add a grade component
-	 * @param Grade $grade Object derived from Grade
-	 * @return Grade object passed in
+	 * @param GradePart $grade Object derived from Grade
+	 * @return GradePart object passed in
 	 */
-	public function add(Grade $grade) { 
-		$this->grades[] = $grade;
+	public function add(GradePart $grade) {
+		$this->gradeParts[] = $grade;
 		return $grade;
 	}
 
@@ -81,7 +81,7 @@ class AssignmentGrading {
 	 * @param int $points Number of points allocated to this category
 	 * @param string $tag Tag associated with this category
 	 * @param string $name Name of the grade
-	 * @return Grade object
+	 * @return GradePart object
 	 */
 	public function add_manual($points, $tag, $name) {
 		return $this->add(new GradeManual($points, $tag, $name));
@@ -145,6 +145,123 @@ class AssignmentGrading {
 		return $this->add(new GradeOverride());
 	}
 
+	/**
+	 * Get all existing Grade objects for a user for this assignment.
+	 * @param User $user User we are getting the grades for.
+	 * @return array of Grade objects with key gradeTag
+	 */
+	public function getUserGrades(User $user) {
+		$gradesTable = new Grades($this->assignment->site->db);
+		$grades = $gradesTable->getUserGrades($user, $this->assignment->tag);
+
+		// This function only returns grades that existing
+		// in the database. For any grade item that does not
+		// exist, ask the grade item to create a new grade
+		// object.
+		foreach($this->gradeParts as $gradePart) {
+			if(empty($grades[$gradePart->tag])) {
+				$grade = $gradePart->createGrade($this->assignment->tag);
+				// If the grade does not come from the grade table, the
+				// function returns null.
+				if($grade !== null) {
+					$grades[$grade->tag] = $grade;
+				}
+			}
+		}
+
+		return $grades;
+	}
+
+	/**
+	 * Create the grading forms for staff use
+	 * @param User $grader User doing the grading
+	 * @param User $user User we are grading
+	 * @param array $grades Result from call to getUserGrades
+	 * @return array of arrays, each describing a grader
+	 */
+	public function createGraders(User $grader, User $user, $grades) {
+		$graders = [];
+
+		/*
+		 * Create the HTML form for each grade part
+		 */
+		foreach($this->gradeParts as $gradeItem) {
+			$graders[] = $gradeItem->createGrader($grader, $user, $grades);
+		}
+
+		return $graders;
+	}
+
+
+	/**
+	 * Create the grading presentation for students
+	 * @param User $user User we are presenting
+	 * @param array $grades Result from call to getUserGrades
+	 * @return array of arrays, each describing a grader
+	 */
+	public function presentGrades(User $user, $grades) {
+		$presented = [];
+
+		foreach($this->gradeParts as $gradeItem) {
+			$grading = $gradeItem->presentGrade($user, $grades);
+			if($grading !== null) {
+				// Some grade parts may be skipped.
+				// For example, an override grade only appears if used.
+				$presented[] = $grading;
+			}
+		}
+
+		return $presented;
+	}
+
+	/**
+	 * Post grades for a user
+	 * @param User $grader User doing the grading
+	 * @param User $user User we are grading
+	 * @param array $grades Result from call to getUserGrades
+	 * @param array $post $_POST
+	 * @param int $time Current time
+	 */
+	public function postGraders(User $grader, User $user, array $grades, array $post, $time) {
+		$site = $this->assignment->site;
+		foreach($this->gradeParts as $gradePart) {
+			$gradePart->postGrader($site, $grader, $user, $grades, $post, $time);
+		}
+	}
+
+	/**
+	 * Compute the grade for this assignment
+	 * @param User $user User we are grading
+	 * @param array $grades Result from call to getUserGrades
+	 * @return int Computed grade
+	 */
+	public function computeGrade(User $user, array $grades) {
+		$total = 0;
+		$override = null;
+
+		foreach($this->gradeParts as $gradePart) {
+			$grade = $gradePart->computeGrade($user, $grades);
+			if(!empty($grade['override'])) {
+				$override = $grade['override'];
+			} else {
+				// If any of the returned values for points is
+				// null, we are not able to yet compute a grade.
+				$points = $grade['points'];
+				if($total !== null && $points !== null) {
+					$total += $points;
+				} else {
+					$total = null;
+				}
+			}
+		}
+
+		if($override !== null) {
+			return $override;
+		}
+
+		return $total;
+	}
+
 
 //
 //	/** \brief Clear all points for all grading categories
@@ -199,34 +316,8 @@ class AssignmentGrading {
 //			}
 //		}
 //	}
-//
-//	/** Provide a grading form for staff use
-//	 * @param \User $user User who is viewing the grading
-//	 * @param \User $gradeUser User we are grading
-//	 * @return HTML for grading form
-//	 */
-//	public function grading_form(\User $user, \User $gradeUser) {
-//		/*
-//		 * Load the grades from the database for this user/assignment
-//		 */
-//		$this->load_grades($gradeUser);
-//
-//		/*
-//		 * Display the form for each grading category
-//		 */
-//		$html = '';
-//		foreach($this->assignmentgrades as $grade) {
-//			$html .= $grade->grading_form($gradeUser);
-//		}
-//
-//		/*
-//		 * Display any submissions
-//		 */
-//		$html .= $this->present_submissions($gradeUser, true);
-//
-//		return $html;
-//	}
-//
+
+
 //	/**
 //	 * Present the reviewing form for this assignment if peer review is active
 //	 * @param \User $user User viewing the form
@@ -510,19 +601,10 @@ class AssignmentGrading {
 		/*
 		 * Ensure there is at least one manual grading category
 		 */
-		if(count($this->grades) === 0) {
+		if(count($this->gradeParts) === 0) {
 			$this->add_manual(100, 'manual', 'Grade');
 		}
 	}
-
-
-//
-//	/** The Grade objects array
-//	 *
-//	 * Mainly used for testing purposes only
-//	 * @returns array of Grade objects */
-//	public function get_grades_array() {return $this->assignmentgrades;}
-//
 
 	/**
 	 * Magic function to disable displaying the section
@@ -537,5 +619,5 @@ class AssignmentGrading {
 			
 	private $assignment;		        ///< Assignment the grades are for
 
-	private $grades = array();	        ///< The Grade objects for the assignment
+	private $gradeParts = array();	    ///< The GradePart objects for the assignment
 }
