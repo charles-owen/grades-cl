@@ -13,7 +13,7 @@ use CL\Site\System\Server;
 use CL\Course\Member;
 
 /**
- * The personal calendar view for the site.
+ * Student view of an assignment grade
  */
 class GradeView extends View {
 	/**

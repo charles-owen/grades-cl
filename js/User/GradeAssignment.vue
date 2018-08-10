@@ -1,3 +1,9 @@
+<!--
+@file
+The assignment grading page for presentation for a user
+/cl/grade/:assignment
+-->
+
 <template>
   <div class="content cl-grader">
     <div class="full">
@@ -19,16 +25,25 @@
 </template>
 
 <script>
-    import GradeHistoryComponent from './Util/GradeHistoryComponent.vue';
+  import GradeHistoryComponent from '../Util/GradeHistoryComponent.vue';
+  import UserVueBase from 'users-cl/js/Vue/UserVueBase.vue';
 
   export default {
+      'extends': UserVueBase,
       props: ['json'],
       components: {
           gradeHistory: GradeHistoryComponent
       },
       mounted() {
-          this.$parent.setTitle(':  ' + this.json.assignment.shortName + ' Grade');
+          this.$parent.setTitle(':  ' + this.json.assignment.shortName + ' Grade for ' + this.user.displayName());
 
+          const menu = [
+              {name: 'Grades', click: () => {
+                  window.location = Site.root = '/cl/grades';
+              }}
+          ];
+
+          this.$parent.setMenu(menu);
       }
   }
 </script>

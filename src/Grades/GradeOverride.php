@@ -22,17 +22,37 @@ class GradeOverride extends GradePart {
 
 
 	/**
+	 * Create the grading status for staff use
+	 * @param int $memberId Member we are grading
+	 * @param array $grades Result from call to getUserGrades
+	 * @return string
+	 */
+	public function createStatus($memberId, array $grades) {
+		if(isset($grades[$this->tag])) {
+			$grade = $grades[$this->tag];
+			if($grade->points !== null) {
+				return $grade->points;
+			}
+		}
+
+		return null;
+	}
+
+
+	/**
 	 * Create the grading form for staff use
-	 * @param User $grader User doing the grading
-	 * @param User $user User we are grading
+	 * @param int $memberId Member we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array describing a grader
 	 */
-	public function createGrader(User $grader, User $user, array $grades) {
-		$data = parent::createGrader($grader, $user, $grades);
+	public function createGrader($memberId, array $grades) {
+		$data = parent::createGrader($memberId, $grades);
 
 		$grade = $grades[$this->tag];
 		$points = $grade->points !== null ? $grade->points : '';
+		if($grade->points !== null) {
+			$data['status'] = 'override/' . $grade->points;
+		}
 		$comment = htmlentities($grade->comment !== null ? $grade->comment : '');
 
 		$data['html'] = <<<HTML
@@ -58,6 +78,8 @@ HTML;
 
 		return $data;
 	}
+
+
 
 
 	/**
@@ -95,12 +117,12 @@ HTML;
 
 	/**
 	 * Create the grading presentation for students
-	 * @param User $user User we are presenting
+	 * @param int $memberId Member we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array of arrays, each describing a grader
 	 */
-	public function presentGrade(User $user, $grades) {
-		$data = parent::presentGrade($user, $grades);
+	public function presentGrade($memberId, $grades) {
+		$data = parent::presentGrade($memberId, $grades);
 
 		$grade = $grades[$this->tag];
 		if($grade->points === null) {
@@ -134,14 +156,16 @@ HTML;
 
 	/**
 	 * Compute the grade for this assignment
-	 * @param User $user User we are grading
+	 * @param int $memberId Member we are grading
 	 * @param array $grades Result from call to getUserGrades
-	 * @return array with key 'points'
+	 * @return array with keys 'points' and optionally 'override'
 	 */
-	public function computeGrade(User $user, array $grades) {
-		$grade = $grades[$this->tag];
-		if($grade->points !== null) {
-			return ['override' => $grade->points];
+	public function computeGrade($memberId, array $grades) {
+		if(isset($grades[$this->tag])) {
+			$grade = $grades[$this->tag];
+			if($grade->points !== null) {
+				return ['override' => $grade->points];
+			}
 		}
 
 		return ['points'=>0];

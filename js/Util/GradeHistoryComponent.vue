@@ -1,13 +1,15 @@
 <template>
-  <div class="cl-grade-history" v-if="history2.length > 0">
-    <div v-if="history2.length > 1" class="cl-toggle">
-      <p class="expander"><a>{{display(history2[0])}} / Expand for additional grading history</a></p>
-      <div class="grades">
-        <p v-for="h in history2">{{display(h)}}</p>
+  <div class="cl-grade-history">
+    <div v-if="history2.length > 0">
+      <div v-if="history2.length > 1" class="cl-toggle">
+        <p class="expander"><a>{{display(history2[0])}} / Expand for additional grading history</a></p>
+        <div class="grades">
+          <p v-for="h in history2">{{display(h)}}</p>
+        </div>
       </div>
-    </div>
-    <div v-else>
-      <p>{{display(history2[0])}}</p>
+      <div v-else>
+        <p>{{display(history2[0])}}</p>
+      </div>
     </div>
   </div>
 

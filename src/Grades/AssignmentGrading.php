@@ -13,6 +13,12 @@ use CL\Users\User;
  * An object of this type is attached to each Assignment object
  * and has a collection of objects derived from Grade that 
  * represent the grading components for the assignment.
+ *
+ * @cond
+ * @property \CL\Course\Assignment assignment
+ * @property array parts
+ * @property number points
+ * @endcond
  */
 class AssignmentGrading {
 	/**
@@ -23,18 +29,32 @@ class AssignmentGrading {
 
 	/**
 	 * Property get magic method
-	 * @param string $key Property name
-	 * @return mixed
+	 *
+	 * <b>Properties</b>
+	 * Property | Type | Description
+	 * -------- | ---- | -----------
+	 * assignment | Assignment | The assignment these grades are for
+	 * parts | array | Array of GradePart objects for this assignment
+	 * points | float | Points to assign to this assignment. 0 means divide equally.
+	 *
+	 * @param string $property Property name
+	 * @return mixed Property value
 	 */
-	public function __get($key) {
-		switch($key) {
+	public function __get($property) {
+		switch($property) {
 			case 'assignment':
 				return $this->assignment;
+
+			case 'parts':
+				return $this->gradeParts;
+
+			case 'points':
+				return $this->points;
 
 			default:
 				$trace = debug_backtrace();
 				trigger_error(
-					'Undefined property ' . $key .
+					'Undefined property ' . $property .
 					' in ' . $trace[0]['file'] .
 					' on line ' . $trace[0]['line'],
 					E_USER_NOTICE);
@@ -44,19 +64,30 @@ class AssignmentGrading {
 
 	/**
 	 * Property set magic method
-	 * @param $key Property name
-	 * @param $value Value to set
+	 *
+	 * <b>Properties</b>
+	 * Property | Type | Description
+	 * -------- | ---- | -----------
+	 * assignment | Assignment | The assignment these grades are for
+	 * points | int | Points to assign to this assignment. 0 means divide equally.
+	 *
+	 * @param string $property Property name
+	 * @param mixed $value Value to set
 	 */
-	public function __set($key, $value) {
-		switch($key) {
+	public function __set($property, $value) {
+		switch($property) {
 			case 'assignment':
 				$this->assignment = $value;
+				break;
+
+			case 'points':
+				$this->points = $value;
 				break;
 
 			default:
 				$trace = debug_backtrace();
 				trigger_error(
-					'Undefined property ' . $key .
+					'Undefined property ' . $property .
 					' in ' . $trace[0]['file'] .
 					' on line ' . $trace[0]['line'],
 					E_USER_NOTICE);
@@ -66,7 +97,7 @@ class AssignmentGrading {
 	}
 		
 	/**
-	 * Add a grade component
+	 * Add a grade componentvp,[iy
 	 * @param GradePart $grade Object derived from Grade
 	 * @return GradePart object passed in
 	 */
@@ -146,6 +177,47 @@ class AssignmentGrading {
 	}
 
 	/**
+	 * Get all Grade objects for all users for this assignment.
+	 * @return array with key member id.
+	 */
+	public function getAllGrades() {
+		$section = $this->assignment->section;
+		$semester = $section->semester;
+		$sectionId = $section->id;
+
+		// Get the raw grade data
+		$gradesTable = new Grades($this->assignment->site->db);
+		$rawGrades = $gradesTable->getAssignmentGrades($semester, $sectionId, $this->assignment->tag);
+
+		// Compute it for the user
+		$grades = [];
+
+		foreach($rawGrades as $memberId => $rawMemberGrades) {
+			$grades[$memberId] = [];
+
+			$memberGrades = [];
+
+			foreach($this->gradeParts as $gradeItem) {
+				$status = $gradeItem->createStatus($memberId, $rawGrades[$memberId]);
+				if($status !== null) {
+					$memberGrades[$gradeItem->tag] = $status;
+				}
+			}
+
+			$grade = $this->computeGrade($memberId, $rawGrades[$memberId]);
+
+			$grades[$memberId] = [
+				'grades'=>$memberGrades,
+				'grade'=>$grade
+			];
+
+
+		}
+
+		return $grades;
+	}
+
+	/**
 	 * Get all existing Grade objects for a user for this assignment.
 	 * @param User $user User we are getting the grades for.
 	 * @return array of Grade objects with key gradeTag
@@ -154,7 +226,7 @@ class AssignmentGrading {
 		$gradesTable = new Grades($this->assignment->site->db);
 		$grades = $gradesTable->getUserGrades($user, $this->assignment->tag);
 
-		// This function only returns grades that existing
+		// This function only returns grades that exist
 		// in the database. For any grade item that does not
 		// exist, ask the grade item to create a new grade
 		// object.
@@ -186,7 +258,7 @@ class AssignmentGrading {
 		 * Create the HTML form for each grade part
 		 */
 		foreach($this->gradeParts as $gradeItem) {
-			$graders[] = $gradeItem->createGrader($grader, $user, $grades);
+			$graders[] = $gradeItem->createGrader($user->member->id, $grades);
 		}
 
 		return $graders;
@@ -203,7 +275,7 @@ class AssignmentGrading {
 		$presented = [];
 
 		foreach($this->gradeParts as $gradeItem) {
-			$grading = $gradeItem->presentGrade($user, $grades);
+			$grading = $gradeItem->presentGrade($user->member->id, $grades);
 			if($grading !== null) {
 				// Some grade parts may be skipped.
 				// For example, an override grade only appears if used.
@@ -231,16 +303,16 @@ class AssignmentGrading {
 
 	/**
 	 * Compute the grade for this assignment
-	 * @param User $user User we are grading
+	 * @param int $memberId Member we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return int Computed grade
 	 */
-	public function computeGrade(User $user, array $grades) {
+	public function computeGrade($memberId, array $grades) {
 		$total = 0;
 		$override = null;
 
 		foreach($this->gradeParts as $gradePart) {
-			$grade = $gradePart->computeGrade($user, $grades);
+			$grade = $gradePart->computeGrade($memberId, $grades);
 			if(!empty($grade['override'])) {
 				$override = $grade['override'];
 			} else {
@@ -259,7 +331,7 @@ class AssignmentGrading {
 			return $override;
 		}
 
-		return $total;
+		return $total !== null ? round($total, 1) : null;
 	}
 
 
@@ -606,6 +678,8 @@ class AssignmentGrading {
 		}
 	}
 
+
+
 	/**
 	 * Magic function to disable displaying the section
 	 * @return array Properties to dump
@@ -616,8 +690,11 @@ class AssignmentGrading {
 		unset($properties['assignment']);
 		return $properties;
 	}
-			
-	private $assignment;		        ///< Assignment the grades are for
 
-	private $gradeParts = array();	    ///< The GradePart objects for the assignment
+	/* @var  \CL\Course\Assignment */
+	private $assignment;		    // Assignment the grades are for
+
+	private $gradeParts = array();	// The GradePart objects for the assignment
+
+	private $points = 0;            // Optional points for this assignment, 0=divide equally
 }

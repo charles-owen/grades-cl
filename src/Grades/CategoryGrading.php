@@ -6,10 +6,24 @@
 
 namespace CL\Grades;
 
+use CL\Users\User;
+
 /**
  * Grading for a category. Attaches to the category object.
  */
 class CategoryGrading {
+
+	/**
+	 * Return the category data in a form suitable for sending
+	 * to the client.
+	 *
+	 * @return array with keys 'name' and 'points'
+	 */
+	public function data() {
+		return [
+			'points'=>$this->points
+		];
+	}
 
 	/**
 	 * Property get magic method
@@ -69,82 +83,110 @@ class CategoryGrading {
 		}
 	}
 
-//	/**
-//	 * Compute the grade for this category
-//	 */
-//	public function computeGrade(\User $user) {
-//		/*
-//		 * First, we need to ensure we have a percentage
-//		 * assigned to every assignment. We total what we
-//		 * are given and divide the remainder among all
-//		 * assignments that have a zero percentage
-//		 */
-//		$total = 0;
-//		$zeros = array();
-//		foreach($this->assignments as $assignment) {
-//			$assignment->load($user);
-//			$p = $assignment->get_percent();
-//			if($p == 0) {
-//				$zeros[] = $assignment;
-//			}
-//
-//			$total += $p;
-//		}
-//
-//		if(count($zeros) > 0 && $total < 100) {
-//			$p1 = (100.0 - $total) / count($zeros);
-//			foreach($zeros as $zero) {
-//				$zero->set_percent($p1);
-//			}
-//		}
-//
-//		/*
-//		 * Now collect up the grades for every assignment in the category
-//		 */
-//		$grades = array();
-//		foreach($this->assignments as $assignment) {
-//			$percent = $assignment->get_percent();
-//			$grading = $assignment->get_grading();
-//			$grading->load_grades($user);
-//			$grade = $grading->get_grade();
-//			if($grade === null) {
-//				$grade = 0;
-//			}
-//
-//			$grades[] = array($grade, $percent);
-//		}
-//
-//		if($this->droplowest != 0) {
-//			uasort($grades, function($a, $b) {
-//				if($a[0] == $b[0]) {
-//					return 0;
-//				}
-//
-//				return ($a[0] < $b[0]) ? 1 : -1;
-//			});
-//
-//			for($i=0; $i<$this->droplowest; $i++) {
-//				array_pop($grades);
-//			}
-//		}
-//
-//		/*
-//		 * And total them
-//		 */
-//		$percent = 0;
-//		$total = 0;
-//		foreach($grades as $grade) {
-//			$percent += $grade[1] * 0.01;
-//			$total += $grade[1] * 0.01 * $grade[0];
-//		}
-//
-//		// Correct for any dropped assignments (missing percentages)
-//		if($percent != 0) {
-//			$total /= $percent;
-//		}
-//
-//		return $total;
-//	}
+	/**
+	 * Compute the grade for this category
+	 */
+	public function computeGrade(User $user, $time) {
+		/*
+		 * First, we need to ensure we have a percentage
+		 * assigned to every assignment. We total what we
+		 * are given and divide the remainder among all
+		 * assignments that have a zero percentage
+		 */
+		$assignments = $this->category->assignments;
+		$total = 0;
+		$zeros = array();
+		foreach($assignments as $assignment) {
+			$assignment->load($user);
+			$p = $assignment->grading->points;
+			if($p == 0) {
+				$zeros[] = $assignment;
+			}
+
+			$total += $p;
+		}
+
+		if(count($zeros) > 0 && $total < 100) {
+			$p1 = (100.0 - $total) / count($zeros);
+			foreach($zeros as $zero) {
+				$zero->grading->points = $p1;
+			}
+		}
+
+
+		/*
+		 * Now collect up the grades for every assignment in the category
+		 */
+		$grades = [];
+		$indices = [];
+		foreach($assignments as $assignment) {
+			$grade = [];
+
+			$grading = $assignment->grading;
+
+			$grade['name'] = $assignment->name;
+			$grade['tag'] = $assignment->tag;
+			$grade['points'] = round($grading->points, 1);
+
+			$grade['closed'] = $assignment->after_due($user, $time);
+
+			$rawGrades = $grading->getUserGrades($user);
+			$grading->presentGrades($user, $rawGrades);
+			$computedGrade = $grading->computeGrade($user, $rawGrades);
+			$grade['grade'] = $computedGrade;
+			$grade['applied'] = $computedGrade !== null ? $computedGrade : 0;
+
+			$indicies[] = count($grades);
+			$grades[] = $grade;
+		}
+
+		if($this->dropLowest != 0) {
+			uasort($indicies, function($a, $b) use($grades) {
+				return $grades[$a]['applied'] - $grades[$b]['applied'];
+			});
+
+			for($i=0; $i<$this->droplowest; $i++) {
+				$grades[$indicies[$i]]['drop'] = true;
+			}
+		}
+
+		/*
+		 * And total them
+		 */
+		$points = 0;
+		$total = 0;
+		$available = 0;
+		foreach($grades as $grade) {
+			if(isset($grade['drop'])) {
+				continue;
+			}
+
+			$points += $grade['points'] * 0.01;
+			$total += $grade['points'] * 0.01 * $grade['applied'];
+
+			// The points from an assignment are considered to
+			// be available when it has been graded.
+			if($grade['grade'] !== null) {
+				if($grade['closed'] || $grade['grade'] > 0) {
+					$available += $grade['points'];
+				}
+			}
+		}
+
+		// Correct for any dropped assignments (missing percentages)
+		if($points != 0) {
+			$total /= $points;
+		}
+
+		$data = [
+			'name'=>$this->category->name,
+			'points'=>$this->points,
+			'assignments'=>$grades,
+			'grade'=>$total,
+			'available'=>$available];
+
+		return $data;
+	}
 
 
 

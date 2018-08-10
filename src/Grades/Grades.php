@@ -103,6 +103,37 @@ SQL;
 		}
 	}
 
+	public function getAssignmentGrades($semester, $sectionId, $assignTag) {
+		$membersTable = new Members($this->config);
+
+		$sql = <<<SQL
+select member.id as memberid, grade.points as points, grade.gradetag as gradetag, grade.comment as comment, grade.metadata as metadata
+from $this->tablename grade
+join $membersTable->tablename member
+on member.id = grade.memberid
+where member.semester=? and member.section=? and assigntag=?
+SQL;
+
+		$pdo = $this->pdo;
+		// echo $this->sub_sql($sql, [$semester, $sectionId, $assignTag]);
+		try {
+			$stmt = $pdo->prepare($sql);
+			$stmt->execute([$semester, $sectionId, $assignTag]);
+			$ret = [];
+			foreach($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+				$memberId = $row['memberid'];
+				if(!isset($ret[$memberId])) {
+					$ret[$memberId] = [];
+				}
+
+				$ret[$memberId][$row['gradetag']] = new Grade($assignTag, $row['gradetag'], $row);
+			}
+
+			return $ret;
+		} catch(\PDOException $e) {
+			return [];
+		}
+	}
 
 	/**
 	 * Get all grades for a user/assignment.
@@ -148,11 +179,7 @@ SQL;
 		}
 
 		if(isset($params['userId'])) {
-			$where->append('user.id=?', $params['userId']);
-		}
-
-		if(isset($params['email'])) {
-			$where->append('user.email=?', $params['email']);
+			$where->append('member.userid=?', $params['userId']);
 		}
 
 		if(isset($params['semester'])) {

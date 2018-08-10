@@ -12,6 +12,7 @@ use CL\Site\System\Server;
 use CL\Course\AssignmentCategory;
 use CL\Course\Assignment;
 use CL\Site\Router;
+use CL\Course\Section;
 
 /**
  * Plugin class for the Grades/Gradebook Subsystem
@@ -62,10 +63,22 @@ class GradesPlugin extends \CL\Site\Plugin {
 				return $view->vue();
 			});
 
+			$router->addRoute(['grades'], function(Site $site, Server $server, array $params, array $properties, $time) {
+				$view = new GradesView($site, $server, $time);
+				return $view->vue();
+			});
+
+			$router->addRoute(['grades', 'csv'], function(Site $site, Server $server, array $params, array $properties, $time) {
+				$view = new GradesCsvDownload($site, $server, $time);
+				return $view->whole();
+			});
+
 			$router->addRoute(['api', 'grade', '*'], function(Site $site, Server $server, array $params, array $properties, $time) {
 				$resource = new GradesApi();
 				return $resource->apiDispatch($site, $server, $params, $properties, $time);
 			});
+		} else if($object instanceof Section) {
+			$object->grading = new SectionGrading();
 		} else if($object instanceof Assignment) {
 			$object->grading = new AssignmentGrading();
 		} else if($object instanceof AssignmentCategory) {

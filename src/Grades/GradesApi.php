@@ -43,14 +43,182 @@ class GradesApi extends \CL\Users\Api\Resource {
 		}
 
 		switch($params[0]) {
+			// /api/grade/all
+			case 'all':
+				return $this->all($site, $user, $server, $params, $time);
+
+			// /api/grade/grader/:assigntag/:memberid
 			case 'grader':
 				return $this->grader($site, $user, $server, $params, $time);
 
+			// /api/grade/grades/:assigntag
+			case 'grades':
+				return $this->grades($site, $user, $server, $params);
+
+			// /api/grade/grade/:memberid
+			case 'grade':
+				return $this->grade($site, $user, $server, $params, $time);
+
+			// /api/grade/tables
 			case 'tables':
 				return $this->tables($site, $server, new GradesTables($site->db));
 		}
 
 		throw new APIException("Invalid API Path", APIException::INVALID_API_PATH);
+	}
+
+	private function all(Site $site, User $grader, Server $server, array $params, $time) {
+		$this->atLeast($grader, Member::GRADER);
+
+		$semester = $grader->member->semester;
+		$sectionId = $grader->member->sectionId;
+
+		$section = $site->course->get_section($semester, $sectionId);
+		if($section === null) {
+			throw new APIException("Course section does not exist");
+		}
+
+		$data = [];
+
+		//
+		// Get all members of this section
+		//
+		$membersTable = new Members($site->db);
+		$members = $membersTable->query(['semester'=>$semester, 'section'=>$sectionId]);
+		foreach($members as $user) {
+			//
+			// Loop over the categories, asking each for a grade
+			//
+			$grades = [];
+			$total = 0;
+			$available = 0;
+			foreach($section->assignments->categories as $category) {
+				$categoryGrades = $category->grading->computeGrade($user, $time);
+				$total += $categoryGrades['points'] * 0.01 * $categoryGrades['grade'];
+				$available += $categoryGrades['points'] * 0.01 * $categoryGrades['available'];
+				$grades[$category->tag] = $categoryGrades;
+			}
+
+			$data[$user->member->id] = [
+				'member'=>$user->member->id,
+				'categories' => $grades,
+				'grade' => $total,
+				'available'=>$available
+			];
+		}
+
+		$json = new JsonAPI();
+		$json->addData('grades-all', 0, $data);
+		return $json;
+
+	}
+
+	/**
+	 * Compute and return course grade
+	 *
+	 * /api/grade/grade/:memberid
+	 *
+	 * @param Site $site
+	 * @param User $user
+	 * @param Server $server
+	 * @param array $params
+	 * @param $time
+	 * @return JsonAPI
+	 * @throws APIException
+	 */
+	private function grade(Site $site, User $user, Server $server, array $params, $time) {
+		$this->atLeast($user,Member::GRADER);
+
+		if(count($params) < 2) {
+			throw new APIException("Invalid API Path", APIException::INVALID_API_PATH);
+		}
+
+		$memberId = +$params[1];
+		$members = new Members($site->db);
+		$user = $members->getAsUser($memberId);
+		if($user === null) {
+			throw new APIException("Course member does not exist");
+		}
+
+		$member = $user->member;
+		$section = $site->course->get_section($member->semester, $member->sectionId);
+		if($section === null) {
+			throw new APIException("Course section does not exist");
+		}
+
+		//
+		// Loop over the categories, asking each for a grade
+		//
+		$grades = [];
+		$total = 0;
+		$available = 0;
+		foreach($section->assignments->categories as $category) {
+			$categoryGrades = $category->grading->computeGrade($user, $time);
+			$total += $categoryGrades['points'] * 0.01 * $categoryGrades['grade'];
+			$available += $categoryGrades['points'] * 0.01 * $categoryGrades['available'];
+			$grades[] = $categoryGrades;
+		}
+
+		$data = [
+			'categories' => $grades,
+			'grade' => $total,
+			'available'=>$available
+		];
+
+		$json = new JsonAPI();
+		$json->addData('grade', 0, $data);
+		return $json;
+	}
+
+	/**
+	 * /api/grade/grades/:assigntag
+	 *
+	 * Get all grades for an assignment. This is for presentation
+	 * of grades to staff for all students.
+	 *
+	 * @param Site $site The Site object
+	 * @param User $user User we are returning grade for
+	 * @param Server $server The Server object
+	 * @param array $params Parameters from the router
+	 * @return JsonAPI
+	 * @throws APIException
+	 */
+	private function grades(Site $site, User $user, Server $server, array $params) {
+		$this->atLeast($user,Member::GRADER);
+
+		if(count($params) < 2) {
+			throw new APIException("Invalid API Path", APIException::INVALID_API_PATH);
+		}
+
+		$assignTag = $params[1];
+		$member = $user->member;
+		$section = $site->course->get_section($member->semester, $member->sectionId);
+		if($section === null) {
+			throw new APIException("Course section does not exist");
+		}
+
+		$assignment = $section->get_assignment($assignTag);
+		if($assignment === null) {
+			throw new APIException("Assignment does not exist");
+		}
+
+		$assignment->load();
+		$grading = $assignment->grading;
+		$parts = [];
+		foreach($grading->parts as $part) {
+			$parts[] = ['tag'=>$part->tag,
+				'name'=>$part->name,
+				'points'=>$part->points];
+		}
+
+
+		// Get all existing grade data in raw form
+		$grades = $grading->getAllGrades();
+
+		$json = new JsonAPI();
+		$json->addData('grades', 0, $grades);
+		$json->addData('grade-parts', 0, $parts);
+		return $json;
 	}
 
 	/**
@@ -124,34 +292,5 @@ class GradesApi extends \CL\Users\Api\Resource {
 		return $json;
 	}
 
-
-
-//	private function status(Site $site, Server $server, array $params, $time) {
-//		$user = $this->isUser($site, Member::STUDENT);
-//
-//
-
-//
-//		$sectionStatus = new SectionStatus($site->db);
-//
-//		$post = $server->post;
-//		if(!Server::ensureKeys($post, ['status']) || !$sectionStatus->validStatus($post['status'])) {
-//			throw new APIException("Invalid API Usage", APIException::INVALID_API_USAGE);
-//		}
-//
-//		$status = $post['status'];
-
-//		$assignTag = $params[1];
-//		$sectionTag = $params[2];
-
-//		$stepSection = $assignment->get_section($sectionTag);
-//		if($stepSection === null) {
-//			throw new APIException("Assignment section does not exist");
-//		}
-//
-//		$sectionStatus->set($user, $assignTag, $sectionTag, $status, $time);
-//
-//		return new JsonAPI();
-//	}
 
 }

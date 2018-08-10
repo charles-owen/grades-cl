@@ -1,10 +1,17 @@
+<!--
+@file
+The main grading page
+/cl/console/grading
+-->
+
 <template>
   <div class="content">
     <div >
     <h2>Grades Summary</h2>
       <ul>
-        <li>All Students</li>
-        <li>All Students Grade Links</li>
+        <li><router-link :to="root + '/cl/console/grades/all'">All Students</router-link></li>
+        <li><router-link :to="root + '/cl/console/grades/links'">All Students Grade Links</router-link></li>
+        <li><a :href="root + '/cl/grades/csv'">Download Student Grades</a></li>
       </ul>
       <div v-for="category in section.assignments.categories">
         <h2>{{category.name}}</h2>
@@ -20,7 +27,10 @@
 </template>
 
 <script>
+    import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
+
     export default {
+        'extends': ConsoleComponentBase,
         data: function() {
             return {
                 section: null,

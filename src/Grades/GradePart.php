@@ -111,13 +111,22 @@ abstract class GradePart {
 	}
 
 	/**
+	 * Create the grading status for staff use
+	 * @param int $memberId Member we are grading
+	 * @param array $grades Result from call to getUserGrades
+	 * @return string
+	 */
+	public function createStatus($memberId, array $grades) {
+		return '';
+	}
+
+	/**
 	 * Create the grading form for staff use
-	 * @param User $grader User doing the grading
-	 * @param User $user User we are grading
+	 * @param int $memberId Member we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array describing a grader
 	 */
-	public function createGrader(User $grader, User $user, array $grades) {
+	public function createGrader($memberId, array $grades) {
 
 		$data = [
 			'tag'=>$this->tag,
@@ -126,21 +135,21 @@ abstract class GradePart {
 			'html'=>''
 		];
 
-		$grade = $grades[$this->tag];
-		if($grade !== null) {
-			$data['history'] = $grade->getHistory();
-		}
+			$grade = $grades[$this->tag];
+			if($grade !== null) {
+				$data['history'] = $grade->getHistory();
+			}
 
 		return $data;
 	}
 
 	/**
 	 * Create the grading presentation for students
-	 * @param User $user User we are presenting
+	 * @param int $memberId Member we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array of arrays, each describing a grader
 	 */
-	public function presentGrade(User $user, $grades) {
+	public function presentGrade($memberId, $grades) {
 		$data = [
 			'tag'=>$this->tag,
 			'name'=>$this->name,
@@ -172,11 +181,11 @@ abstract class GradePart {
 
 	/**
 	 * Compute the grade for this assignment
-	 * @param User $user User we are grading
+	 * @param int $memberId Member we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array with keys 'points' and optionally 'override'
 	 */
-	public abstract function computeGrade(User $user, array $grades);
+	public abstract function computeGrade($memberId, array $grades);
 
 
 	/**

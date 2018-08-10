@@ -23,6 +23,12 @@ div.cl-grader {
     color: $comp;
   }
 
+  button.cl-grader-button {
+    font-style: italic;
+    font-size: 0.9em;
+    color: black;
+  }
+
   div.grader {
     display: flex;
     flex-direction: row;

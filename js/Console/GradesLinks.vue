@@ -1,3 +1,9 @@
+<!--
+@file
+All student grade links
+/cl/console/grades/links
+-->
+
 <template>
   <div class="content">
     <div class="full">
@@ -9,7 +15,7 @@
               <th>Name</th>
               <th>Role</th>
             </tr>
-            <tr v-for="user in fetcher.users">
+            <tr v-for="user in fetcher.users" :class="user.role() !== 'T' ? 'ignore' : ''">
               <td><router-link :to="link + user.member.id">{{user.userId}}</router-link></td>
               <td><router-link :to="link + user.member.id">{{user.name}}</router-link></td>
               <td>{{user.roleName()}}</td>
@@ -23,30 +29,25 @@
 </template>
 
 <script>
+    import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
     import MembersFetcherComponent from 'course-cl/js/Console/Members/MembersFetcherComponent.vue';
 
     export default {
-        props: ['assigntag'],
+        'extends': ConsoleComponentBase,
         data: function() {
             return {
-                link: Site.root + '/cl/console/grading/' + this.assigntag + '/'
+                link: Site.root + '/cl/console/grades/',
+                grades: null,
+                parts: []
             }
         },
         components: {
             'membersfetcher': MembersFetcherComponent
         },
         mounted() {
-            const member = this.$store.state.user.user.member;
-            let query = {
-                semester: member.semester,
-                section: member.section
-            };
-
-            this.section = this.$store.getters['course/section'](member.semester, member.section);
-            this.assignment = this.section.getAssignment(this.assigntag);
-
-            this.$parent.setTitle(': ' + this.assignment.shortname + ' Grading');
-
+            this.$parent.setTitle(': Grades');
+        },
+        methods: {
         }
     }
 </script>

@@ -4,9 +4,13 @@
  */
 
 import {Member} from 'course-cl/js/Members/Member';
-import GradingMainComponent from './GradingMainComponent.vue';
-import AssignmentGradingVue from './AssignmentGrading.vue';
-import AssignmentMemberGradingVue from './AssignmentMemberGrading.vue'
+
+import GradingVue from './Grading.vue';
+import GradingAssignmentVue from './GradingAssignment.vue';
+import GradingAssignmentMemberVue from './GradingAssignmentMember.vue'
+import GradesLinksVue from './GradesLinks.vue';
+import GradesAllVue from './GradesAll.vue';
+import GradesMemberVue from './GradesMember.vue';
 
 export const GradesConsole = function() {
 }
@@ -18,13 +22,16 @@ GradesConsole.install = function(Console) {
             title: 'Grading',
             route: '/grading',
             order: 4,
-            component: GradingMainComponent
+            component: GradingVue
         }
     });
 
     Console.components.addRoutes([
-        {route: '/grading/:assigntag', component: AssignmentGradingVue, props: true},
-        {route: '/grading/:assigntag/:memberid', component: AssignmentMemberGradingVue, props: true}
+        {route: '/grading/:assigntag', component: GradingAssignmentVue, props: true},
+        {route: '/grading/:assigntag/:memberid', component: GradingAssignmentMemberVue, props: true},
+        {route: '/grades/links', component: GradesLinksVue},
+        {route: '/grades/all', component: GradesAllVue},
+        {route: '/grades/:memberid', component: GradesMemberVue, props: true}
     ]);
 
     Console.tables.add({

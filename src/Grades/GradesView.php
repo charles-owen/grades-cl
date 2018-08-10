@@ -1,0 +1,49 @@
+<?php
+/**
+ * @file
+ * Student view of all of their grades
+ * /cl/grades
+ */
+
+namespace CL\Grades;
+
+use CL\Site\Site;
+use CL\Course\View;
+use CL\Site\System\Server;
+use CL\Course\Member;
+
+/**
+ * Student view of an assignment grade
+ */
+class GradesView extends View {
+	/**
+	 * View constructor.
+	 * @param Site $site The Site object
+	 */
+	public function __construct(Site $site, Server $server, $time) {
+		parent::__construct($site, ['at-least'=>Member::STUDENT]);
+
+		//
+		// Loop over the categories, asking each for a grade
+		//
+		$grades = [];
+		$total = 0;
+		$available = 0;
+		foreach($this->section->assignments->categories as $category) {
+			$categoryGrades = $category->grading->computeGrade($this->user, $time);
+			$total += $categoryGrades['points'] * 0.01 * $categoryGrades['grade'];
+			$available += $categoryGrades['points'] * 0.01 * $categoryGrades['available'];
+			$grades[] = $categoryGrades;
+		}
+
+		$data = [
+			'categories' => $grades,
+			'grade' => $total,
+			'available'=>$available
+		];
+
+		$this->setTitle('Grades for ' . $this->user->displayName);
+		$this->addJS('grades');
+		$this->addCLS('cl-grades', json_encode($data));
+	}
+}
