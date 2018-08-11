@@ -11,12 +11,12 @@
               </tr>
 
               <template v-for="category in grade.categories">
-                <tr>
+                <tr class="cl-category">
                   <td colspan="3">{{category.name}}</td><td>{{category.points}}%</td><td>{{category.grade}}</td>
                 </tr>
 
-                <tr v-for="assignment in category.assignments" :key="assignment.tag">
-                  <td class="indent"><router-link :to="`${root}/cl/console/grading/${assignment.tag}/${fetcher.user.member.id}`">{{assignment.name}}</router-link></td><td>{{assignment.points}}%</td><td>{{assignment.grade}}</td><td colspan="2">&nbsp;</td>
+                <tr class="cl-assignment" v-for="assignment in category.assignments" :key="assignment.tag">
+                  <td><router-link :to="`${root}/cl/console/grading/${assignment.tag}/${fetcher.user.member.id}`">{{assignment.name}}</router-link></td><td>{{assignment.points}}%</td><td>{{assignment.grade}}</td><td colspan="2">&nbsp;</td>
                 </tr>
               </template>
 

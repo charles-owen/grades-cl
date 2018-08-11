@@ -120,54 +120,15 @@ class AssignmentGrading {
 
 
 
-//    /** Add a quizzes grading category
-//     * @ param $points Number of points to allocate to all quizzes
-//     * @ param $tags Array of tag  => points for the quizzes this category includes
-//     * @ return GradeQuizzes object
-//     */
-//    public function add_quizzes($points, array $tags) {
-//        return $this->add(new \Quiz\GradeQuizzes($this, $points, $tags));
-//    }
-//
-//    /** Find and retrieve the GradeQuizzes object */
-//    public function get_quizzes() {
-//        foreach($this->assignmentgrades as $grade) {
-//            if($grade instanceof \Quiz\GradeQuizzes) {
-//                return $grade;
-//            }
-//        }
-//
-//        return null;
-//    }
-//
-//    /** Add a quizzes grading category
-//     *
-//     * Only valid for Step assignments!
-//     * Only 1 allowed
-//     *
-//     * @ param $points Number of points to allocate to all quizzes
-//     * @return GradeQuizzes object
-//     */
-//	public function add_step_quizzes($points) {
-//		return $this->add(new \Step\StepGradeQuizzes($this, $points));
-//	}
-//
-//	/** Find and retrieve the StepGradeQuizzes object */
-//	public function get_step_quizzes() {
-//		foreach($this->assignmentgrades as $grade) {
-//			if($grade instanceof \Step\StepGradeQuizzes) {
-//				return $grade;
-//			}
-//		}
-//
-//		return null;
-//	}
-
-//	/** Add course Handbook grading to an assignment
-//	 * @ param $multiplier Amount the deductions are multiplied by */
-//	public function add_handbook($multiplier) {
-//		return $this->add(new GradeHandbook($this, $multiplier));
-//	}
+	/**
+	 * Add course Handbook grading to an assignment
+	 * @param int $multiplier Amount the deductions are multiplied by
+	 * @return GradePart object
+	 */
+	public function add_handbook($multiplier) {
+		$handbook = $this->assignment->section->handbook;
+		return $this->add(new GradeHandbook($multiplier, $handbook));
+	}
 
 	/**
 	 * Add the override grading category
@@ -250,15 +211,21 @@ class AssignmentGrading {
 	 * @param User $user User we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array of arrays, each describing a grader
+	 * @return array of rubrics
 	 */
-	public function createGraders(User $grader, User $user, $grades) {
+	public function createGraders(User $grader, User $user, $grades, $rubrics) {
 		$graders = [];
 
 		/*
 		 * Create the HTML form for each grade part
 		 */
 		foreach($this->gradeParts as $gradeItem) {
-			$graders[] = $gradeItem->createGrader($user->member->id, $grades);
+			$data = $gradeItem->createGrader($user->member->id, $grades);
+			if(isset($rubrics[$gradeItem->tag])) {
+				$data['rubric'] = $rubrics[$gradeItem->tag];
+			}
+
+			$graders[] = $data;
 		}
 
 		return $graders;
@@ -678,7 +645,36 @@ class AssignmentGrading {
 		}
 	}
 
+	/**
+	 * __call() is triggered when invoking inaccessible methods in an object context.
+	 * @param string $name Name of non-existent function
+	 * @param array $arguments Arguments to the function call
+	 */
+	public function __call($name, $arguments)
+	{
+		if (isset($this->extensions[$name])) {
+			return $this->extensions[$name]($this, $arguments);
+		} else {
+			$trace = debug_backtrace();
+			trigger_error(
+				'Fatal error: Call to undefined method CL\Grading\AssignmentGrading::' .
+				$name . '() in ' . $trace[0]['file'] .
+				' on line ' . $trace[0]['line'],
+				E_USER_NOTICE);
+		}
+	}
 
+	/**
+	 * Extend this class by adding a new function.
+	 * This is used by the Step system to add "add_step"
+	 * to the assignment category.
+	 * @param string $name Name of the function
+	 * @param \Closure $closure Closure to call.
+	 */
+	public function extend($name, $closure)
+	{
+		$this->extensions[$name] = $closure;
+	}
 
 	/**
 	 * Magic function to disable displaying the section
@@ -697,4 +693,5 @@ class AssignmentGrading {
 	private $gradeParts = array();	// The GradePart objects for the assignment
 
 	private $points = 0;            // Optional points for this assignment, 0=divide equally
+	private $extensions = [];       // Extensions to this object
 }

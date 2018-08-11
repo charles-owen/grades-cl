@@ -121,7 +121,7 @@ HTML;
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array of arrays, each describing a grader
 	 */
-	public function presentGrade($memberId, $grades) {
+	public function presentGrade($memberId, array $grades) {
 		$data = parent::presentGrade($memberId, $grades);
 
 		$grade = $grades[$this->tag];

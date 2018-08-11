@@ -43,6 +43,7 @@ abstract class GradePart {
 	 * name | string | Name of the grading item (can be null)
 	 * points | int | Points assigned to this grading item
 	 * tag | string | Tag that identifies this grading item
+	 * useRubric | boolean | false for the base class, override in derived classes
 	 *
 	 * @param string $property Name of the property
 	 * @returns mixed Set value
@@ -57,6 +58,9 @@ abstract class GradePart {
 
 			case 'tag':
 				return $this->tag;
+
+			case 'useRubric':
+				return false;
 
 			default:
 				$trace = debug_backtrace();
@@ -149,7 +153,7 @@ abstract class GradePart {
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array of arrays, each describing a grader
 	 */
-	public function presentGrade($memberId, $grades) {
+	public function presentGrade($memberId, array $grades) {
 		$data = [
 			'tag'=>$this->tag,
 			'name'=>$this->name,

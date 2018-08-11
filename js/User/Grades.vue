@@ -14,12 +14,13 @@ The course grading page for presentation of all grades for a user
           </tr>
 
           <template v-for="category in grade.categories">
-            <tr>
+            <tr class="cl-category">
               <td colspan="3">{{category.name}}</td><td>{{category.points}}%</td><td>{{category.grade}}</td>
             </tr>
 
-            <tr v-for="assignment in category.assignments" :key="assignment.tag">
-              <td class="indent"><a :href="root + '/cl/grade/' + assignment.tag">{{assignment.name}}</a></td><td>{{assignment.points}}%</td><td>{{assignment.grade}}</td><td colspan="2">&nbsp;</td>
+            <tr class="cl-assignment" v-for="assignment in category.assignments" :key="assignment.tag">
+              <td><a :href="root + '/cl/grade/' + assignment.tag">{{assignment.name}}</a></td>
+              <td>{{assignment.points}}%</td><td>{{assignment.grade}}</td><td colspan="2">&nbsp;</td>
             </tr>
           </template>
 

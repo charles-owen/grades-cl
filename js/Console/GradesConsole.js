@@ -11,6 +11,7 @@ import GradingAssignmentMemberVue from './GradingAssignmentMember.vue'
 import GradesLinksVue from './GradesLinks.vue';
 import GradesAllVue from './GradesAll.vue';
 import GradesMemberVue from './GradesMember.vue';
+import RubricsEditorVue from './RubricsEditor.vue';
 
 export const GradesConsole = function() {
 }
@@ -19,6 +20,7 @@ GradesConsole.install = function(Console) {
     Console.components.addOption({
         atLeast: Member.GRADER,
         page: {
+            atLeast: Member.GRADER,
             title: 'Grading',
             route: '/grading',
             order: 4,
@@ -29,6 +31,7 @@ GradesConsole.install = function(Console) {
     Console.components.addRoutes([
         {route: '/grading/:assigntag', component: GradingAssignmentVue, props: true},
         {route: '/grading/:assigntag/:memberid', component: GradingAssignmentMemberVue, props: true},
+        {route: '/rubric/:assigntag', component: RubricsEditorVue, props: true},
         {route: '/grades/links', component: GradesLinksVue},
         {route: '/grades/all', component: GradesAllVue},
         {route: '/grades/:memberid', component: GradesMemberVue, props: true}

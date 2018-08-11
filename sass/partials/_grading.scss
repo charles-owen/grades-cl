@@ -2,6 +2,12 @@
 
 div.cl-grader {
 
+  button.link-button {
+    font-size: 0.8em;
+    padding: 0 2px;
+    font-style: italic;
+  }
+
   p.title {
     text-align: center;
     font-size: 1.1em;
@@ -27,6 +33,27 @@ div.cl-grader {
     font-style: italic;
     font-size: 0.9em;
     color: black;
+  }
+
+  tr.cl-category {
+    td {
+      text-align: right;
+    }
+
+    td:first-child {
+      text-align: left;
+    }
+  }
+
+  tr.cl-assignment {
+    td {
+      text-align: right;
+    }
+
+    td:first-child {
+      text-align: left;
+      padding-left: 3em;
+    }
   }
 
   div.grader {
@@ -81,6 +108,75 @@ div.cl-grader {
 
   }
 
+  table.cl-handbook {
+    width: 90%;
+
+    td:last-child, th:last-child {
+      width: 1px;
+      white-space: nowrap;
+    }
+
+    input[type=radio] {
+      display: inline-block;
+      padding: 0 2px;
+      margin: 0 2px;
+    }
+
+    input[type=text] {
+      width: 100%;
+    }
+
+    textarea {
+      width: 100%;
+    }
+
+    td.cl-deduct {
+      text-align: center;
+      font-size: 1.5em;
+    }
+
+    div.comment {
+      @extend %shadow;
+      white-space: pre;
+      background: #f0f0f0;
+      font-style: normal;
+      border: 1px solid #a9a9a9;
+      height: 80px;
+      overflow: auto;
+      padding: 2px;
+      margin: 0.3em 0;
+    }
+  }
+
+  p.cl-rubric-expand {
+    margin-bottom: 0.1em;
+  }
+
+  div.cl-rubricblock {
+    background: $very-light-primary;
+    padding: 5px;
+    border: 1px #808080 solid;
+    word-wrap: normal;
+    font-size: 0.9em;
+
+    p:first-child, ul:first-child {
+      margin-top: 0;
+    }
+
+    p:last-child, ul:last-child {
+      margin-bottom: 0;
+    }
+
+    li.item, p.item, ul.items li {
+      color: $very-light-primary-link;
+      cursor: pointer;
+    }
+
+    li.item:hover, p.item:hover, ul.items li:hover {
+      color: $very-light-primary-hover;
+    }
+  }
+
   textarea {
     background: #f0f0f0;
     font-style: normal;
@@ -92,6 +188,26 @@ div.cl-grader {
     p:first-child {
       text-align: center;
       font-size: 1.2em;
+    }
+  }
+
+  div.cl-rubric {
+
+
+    div.cl-show {
+      @extend %shadow;
+      margin: 1em 0;
+      word-wrap: normal;
+      min-height: 8em;
+    }
+
+    textarea {
+      font-size: 0.9em;
+      margin: 1em 0;
+      background: #f0f0f0;
+      font-style: normal;
+      width: 100%;
+      min-height: 8em;
     }
   }
 }

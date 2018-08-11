@@ -46,7 +46,6 @@ CREATE TABLE IF NOT EXISTS `$this->tablename` (
   PRIMARY KEY (memberid, 
   assigntag, 
   gradetag));
-);
 SQL;
 
 		return $query;

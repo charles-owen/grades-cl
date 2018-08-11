@@ -59,12 +59,87 @@ class GradesApi extends \CL\Users\Api\Resource {
 			case 'grade':
 				return $this->grade($site, $user, $server, $params, $time);
 
+			// /api/grade/rubrics/:assigntag
+			// /api/grade/rubrics/:assigntag/:gradetag
+			case 'rubrics':
+				return $this->rubrics($site, $user, $server, $params, $time);
+
 			// /api/grade/tables
 			case 'tables':
 				return $this->tables($site, $server, new GradesTables($site->db));
 		}
 
 		throw new APIException("Invalid API Path", APIException::INVALID_API_PATH);
+	}
+
+	// /api/grade/rubrics/:assigntag
+	// /api/grade/rubrics/:assigntag/:gradetag
+	public function rubrics(Site $site, User $grader, Server $server, array $params, $time) {
+		$this->atLeast($grader, Member::TA);
+
+		if(count($params) < 2) {
+			throw new APIException("Invalid API Path", APIException::INVALID_API_PATH);
+		}
+
+		$assignTag = $params[1];
+		$member = $grader->member;
+		$section = $site->course->get_section($member->semester, $member->sectionId);
+		if($section === null) {
+			throw new APIException("Course section does not exist");
+		}
+
+		$assignment = $section->get_assignment($assignTag);
+		if($assignment === null) {
+			throw new APIException("Assignment does not exist");
+		}
+
+		$assignment->load();
+		$grading = $assignment->grading;
+
+		$rubricTable = new Rubrics($site->db);
+
+		if($server->server['REQUEST_METHOD'] === 'GET') {
+			// Get all existing rubrics for this assignment
+			$rubrics = $rubricTable->get($member->semester, $member->sectionId, $assignment->tag);
+
+			$data = [];
+			foreach($grading->parts as $part) {
+				if(!$part->useRubric) {
+					continue;
+				}
+
+				$tag = $part->tag;
+
+				$rubric = isset($rubrics[$tag]) ? $rubrics[$tag] : '';
+				$data[] = [
+					'tag'=>$part->tag,
+					'name'=>$part->name,
+					'rubric'=>$rubric
+				];
+			}
+
+			$json = new JsonAPI();
+			$json->addData('rubrics', 0, $data);
+			return $json;
+		}
+
+		if($server->server['REQUEST_METHOD'] === 'POST') {
+			if(count($params) < 2) {
+				throw new APIException("Invalid API Path", APIException::INVALID_API_PATH);
+			}
+
+			$post = $server->post;
+			$this->ensure($post, 'rubric');
+
+			$rubric = $post['rubric'];
+
+			$gradeTag = $params[2];
+			$rubricTable->post($member->semester, $member->sectionId, $assignment->tag, $gradeTag, $rubric);
+			$json = new JsonAPI();
+			return $json;
+		}
+
+		throw new APIException("Invalid API Usage", APIException::INVALID_API_USAGE);
 	}
 
 	private function all(Site $site, User $grader, Server $server, array $params, $time) {
@@ -283,9 +358,13 @@ class GradesApi extends \CL\Users\Api\Resource {
 			$data['due'] = $assignment->get_due($user);
 		}
 
-		$data['graders'] = $grading->createGraders($grader, $user, $grades);
+		// Get any stored rubrics
+		$rubricsTable = new Rubrics($site->db);
+		$rubrics = $rubricsTable->get($member->semester, $member->sectionId, $assignment->tag);
 
-		$data['grade'] = $grading->computeGrade($user, $grades);
+		$data['graders'] = $grading->createGraders($grader, $user, $grades, $rubrics);
+
+		$data['grade'] = $grading->computeGrade($memberId, $grades);
 
 		$json = new JsonAPI();
 		$json->addData('grader', $memberId, $data);

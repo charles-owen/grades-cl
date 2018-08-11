@@ -5,7 +5,7 @@ The main grading page
 -->
 
 <template>
-  <div class="content">
+  <div class="content cl-grader">
     <div >
     <h2>Grades Summary</h2>
       <ul>
@@ -19,6 +19,7 @@ The main grading page
           <li v-if="category.assignments.length === 0"><em>Pending...</em></li>
           <li v-for="assignment in category.assignments" :key="assignment.tag">
             <router-link :to="gradingLink + assignment.tag">{{assignment.name}}</router-link>
+            <router-link class="link-button" tag="button" v-if="user.atLeast(ta)" :to="root + '/cl/console/rubric/' + assignment.tag">rubric editor</router-link>
           </li>
         </ul>
       </div>
@@ -27,7 +28,8 @@ The main grading page
 </template>
 
 <script>
-    import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
+  import {Member} from 'course-cl/js/Members/Member';
+  import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
 
     export default {
         'extends': ConsoleComponentBase,
@@ -35,13 +37,16 @@ The main grading page
             return {
                 section: null,
                 gradingLink: Site.root + '/cl/console/grading/',
+                user: null,
+                ta: Member.TA
 
-        }
+          }
         },
         created() {
             this.$parent.setTitle(': Assignment Grading');
 
             let user = this.$store.state.user.user;
+            this.user = user;
             let member = user.member;
 
             this.section = this.$store.getters['course/section'](member.semester, member.section);
@@ -52,10 +57,3 @@ The main grading page
     }
 
 </script>
-
-<style lang="scss" scoped>
-  span.links {
-
-    font-size: 0.85em;
-  }
-</style>

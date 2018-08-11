@@ -10,8 +10,9 @@ The assignment grading page for presentation for a user
       <p class="title">{{json.assignment.name}}</p>
       <div v-for="item in json.grades">
         <h2>{{item.name}}</h2>
-        <div v-html="item.html"></div>
-        <grade-history :history="item.history"></grade-history>
+        <div v-if="item.handbook === undefined"v-html="item.html"></div>
+        <handbook v-else :item="item" readonly="true"></handbook>
+       <grade-history :history="item.history"></grade-history>
       </div>
       <div class="grade">
         <p v-if="json.grade !== null">Computed Grade: {{json.grade}}</p>
@@ -27,12 +28,14 @@ The assignment grading page for presentation for a user
 <script>
   import GradeHistoryComponent from '../Util/GradeHistoryComponent.vue';
   import UserVueBase from 'users-cl/js/Vue/UserVueBase.vue';
+  import HandbookComponent from '../Handbook/Handbook.vue';
 
   export default {
       'extends': UserVueBase,
       props: ['json'],
       components: {
-          gradeHistory: GradeHistoryComponent
+          gradeHistory: GradeHistoryComponent,
+          handbook: HandbookComponent
       },
       mounted() {
           this.$parent.setTitle(':  ' + this.json.assignment.shortName + ' Grade for ' + this.user.displayName());

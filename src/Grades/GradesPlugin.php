@@ -35,6 +35,7 @@ class GradesPlugin extends \CL\Site\Plugin {
 	 * @param Site $site The Site configuration object
 	 */
 	public function install(Site $site) {
+		$this->site = $site;
 	}
 
 
@@ -81,10 +82,14 @@ class GradesPlugin extends \CL\Site\Plugin {
 			$object->grading = new SectionGrading();
 		} else if($object instanceof Assignment) {
 			$object->grading = new AssignmentGrading();
+			$this->site->amend($object->grading);
 		} else if($object instanceof AssignmentCategory) {
 			$object->grading = new CategoryGrading();
 		} else if($object instanceof ConsoleView) {
 			$object->addJS('grades');
 		}
 	}
+
+	/* @var Site */
+	private $site;
 }

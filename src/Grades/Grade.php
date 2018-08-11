@@ -111,7 +111,9 @@ class Grade implements MetaDataOwner {
 	 */
 	public function __set($property, $value) {
 		switch($property) {
-
+			case 'points':
+				$this->points = $value;
+				break;
 
 			default:
 				$trace = debug_backtrace();
@@ -133,10 +135,11 @@ class Grade implements MetaDataOwner {
 	 * @param int $grade New grade value
 	 * @param string $comment Comment associated with the grade (can be null)
 	 * @param int $time	Timestamp for the grade
+	 * @param boolean $force If tru,e we force a new grade indication
 	 * @return true if the grade has changed
 	 */
-	public function set(User $grader, $grade, $comment, $time) {
-		if($grade === $this->points && $comment === $this->comment) {
+	public function set(User $grader, $grade, $comment, $time, $force=false) {
+		if(!$force && $grade === $this->points && $comment === $this->comment) {
 			return false;
 		}
 

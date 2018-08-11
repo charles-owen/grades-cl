@@ -20,5 +20,6 @@ class GradesTables extends \CL\Tables\TableMaker {
 		parent::__construct($config);
 
 		$this->add(new Grades($config));
+		$this->add(new Rubrics($config));
 	}
 }
