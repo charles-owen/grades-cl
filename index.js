@@ -4,6 +4,6 @@ import './_grades.scss';
 
 export const Grades = GradesFactory.create(Site.Site);
 
-if(typeof Console !== 'undefined') {
-    GradesConsole.install(Console);
+if(Site.Console !== undefined) {
+    GradesConsole.install(Site.Console);
 }
