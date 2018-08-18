@@ -7,6 +7,7 @@ The assignment grading page for presentation for a user
 <template>
   <div class="content cl-grader">
     <div class="full">
+      <div class="cl-autoback"></div>
       <p class="title">{{json.assignment.name}}</p>
       <div v-for="item in json.grades">
         <h2>{{item.name}}</h2>
@@ -21,6 +22,7 @@ The assignment grading page for presentation for a user
           <p class="center small notice">Grades are not available until all parts of the assignment have been graded.</p>
         </template>
       </div>
+      <div class="cl-autoback"></div>
     </div>
   </div>
 </template>
@@ -38,6 +40,7 @@ The assignment grading page for presentation for a user
           handbook: HandbookComponent
       },
       mounted() {
+      	console.log('mounted');
           this.$parent.setTitle(':  ' + this.json.assignment.shortName + ' Grade for ' + this.user.displayName());
 
           const menu = [

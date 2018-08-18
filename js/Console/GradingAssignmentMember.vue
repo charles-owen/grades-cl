@@ -129,7 +129,7 @@
             },
             take(response) {
                 const grader = response.getData('grader');
-                this.due = grader.attributes.due;
+                this.due = grader.attributes.due !== undefined ? grader.attributes.due : null;
                 this.graders = grader.attributes.graders;
                 this.grade = grader.attributes.grade;
                 this.$forceUpdate();

@@ -17,8 +17,10 @@ use CL\Course\Member;
  */
 class GradesView extends View {
 	/**
-	 * View constructor.
+	 * GradesView constructor.
 	 * @param Site $site The Site object
+	 * @param Server $server The Server object
+	 * @param int $time Current time
 	 */
 	public function __construct(Site $site, Server $server, $time) {
 		parent::__construct($site, ['at-least'=>Member::STUDENT]);

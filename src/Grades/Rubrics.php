@@ -3,7 +3,6 @@
  * Class for the rubric table
  */
 
-
 namespace CL\Grades;
 
 use CL\Tables\Table;
@@ -12,8 +11,8 @@ use CL\Users\User;
 
 /** The grade table.
  *
- * This class represents the grades table that stores the 
- * assignment grades. */
+ * This class represents the rubric table that stores assignment rubrics.
+ */
 class Rubrics extends Table {
 
 	/**
@@ -51,9 +50,9 @@ SQL;
 
 	/**
 	 * Get all rubrics for an assignment.
-	 * @param $semester
-	 * @param $sectionId
-	 * @param $assignTag
+	 * @param string $semester Semester ID, like 'FS18'
+	 * @param string $sectionId Section ID, like '799'
+	 * @param string $assignTag The assignment tag
 	 * @return array
 	 */
 	public function get($semester, $sectionId, $assignTag) {
@@ -78,10 +77,14 @@ SQL;
 		}
 	}
 
+
 	/**
-	 * Put a rubric in the rubric table
-	 * @param User $user User we are posting for
-	 * @param Grade $grade Grade we are posting
+	 * Post a rubric in the rubric table
+	 * @param string $semester Semester ID, like 'FS18'
+	 * @param string $sectionId Section ID, like '799'
+	 * @param string $assignTag The assignment tag
+	 * @param string $gradeTag The grade tag
+	 * @param string $rubric Rubric content
 	 * @return bool true if successful
 	 */
 	public function post($semester, $sectionId, $assignTag, $gradeTag, $rubric) {

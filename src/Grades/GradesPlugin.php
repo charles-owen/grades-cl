@@ -31,11 +31,36 @@ class GradesPlugin extends \CL\Site\Plugin {
 	public function depends() {return ['course'];}
 
 	/**
+	 * Property get magic method
+	 *
+	 * <b>Properties</b>
+	 * Property | Type | Description
+	 * -------- | ---- | -----------
+	 * gradeLink | string | Link to the student grade view for an assignment
+	 * gradingLink | string | Link to page to the console grading page for an assignment
+	 *
+	 * @param string $property Property name
+	 * @return mixed
+	 */
+	public function __get($property) {
+		switch($property) {
+			case 'gradingLink':
+				return '/cl/console/grading';
+
+			case 'gradeLink':
+				return '/cl/grade';
+
+			default:
+				return parent::__get($property);
+		}
+	}
+	/**
 	 * Install the plugin
 	 * @param Site $site The Site configuration object
 	 */
 	public function install(Site $site) {
 		$this->site = $site;
+		$site->install("grades", $this);
 	}
 
 
