@@ -20,7 +20,7 @@ class GradesCsvDownload extends View {
 	 * FileDownload constructor.
 	 * @param Site $site The Site object
 	 * @param Server $server The Server object
-	 * @param array $vars Parameters passed to route ('id')
+	 * @param int $time Current time
 	 */
 	public function __construct(Site $site, Server $server, $time) {
 		parent::__construct($site, ['atLeast'=>Member::TA]);
