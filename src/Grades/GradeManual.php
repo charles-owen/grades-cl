@@ -10,6 +10,10 @@ use CL\Site\Site;
 
 /**
  * Manually entered grades
+ *
+ * @cond
+ * @property bool useRubric
+ * @endcond
  */
 class GradeManual extends GradePart {
 
@@ -24,6 +28,17 @@ class GradeManual extends GradePart {
 		$this->__set("name", $name);
 	}
 
+	/**
+	 * Property get magic method
+	 *
+	 * <b>Properties</b>
+	 * Property | Type | Description
+	 * -------- | ---- | -----------
+	 * useRubric | boolean | True if this grade type uses the rubric system.
+	 *
+	 * @param string $property Property name
+	 * @return mixed
+	 */
 	public function __get($property) {
 		switch($property) {
 			case 'useRubric':

@@ -1,5 +1,6 @@
 <?php
 /**
+ * @file
  * Table maker for the Grades subsystem tables
  */
 

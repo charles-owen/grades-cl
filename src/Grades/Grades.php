@@ -3,7 +3,9 @@
  * Class for the grade table
  */
 
-
+/**
+ * Classes in the Grades subsystem.
+ */
 namespace CL\Grades;
 
 use CL\Tables\Table;
@@ -102,6 +104,13 @@ SQL;
 		}
 	}
 
+	/**
+	 * Get all grades for all members for an assignment.
+	 * @param string $semester Semester
+	 * @param string $sectionId Section ID
+	 * @param string $assignTag Assignment tag
+	 * @return array of array of Grade. Top level array has key memberId. Next level has key gradeTag.
+	 */
 	public function getAssignmentGrades($semester, $sectionId, $assignTag) {
 		$membersTable = new Members($this->config);
 

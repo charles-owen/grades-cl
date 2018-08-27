@@ -10,6 +10,7 @@ use CL\Site\MetaData;
 use CL\Site\MetaDataOwner;
 use CL\Site\Site;
 use CL\Users\User;
+use \Exception;
 
 /**
  * Represents a single grade value in the system.
@@ -166,10 +167,10 @@ class Grade implements MetaDataOwner {
 	/**
 	 * Write the meta-data for this user.
 	 * @param Site $site Site object so we can access tables.
-	 * @throws \Exception This feature is not supported for the Grade class.
+	 * @throws Exception This feature is not supported for the Grade class.
 	 */
 	public function writeMetaData(Site $site) {
-		throw new \Exception('Not supported');
+		throw new Exception('Not supported');
 	}
 
 	private $assignTag;

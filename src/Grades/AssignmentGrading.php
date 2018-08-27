@@ -210,8 +210,8 @@ class AssignmentGrading {
 	 * @param User $grader User doing the grading
 	 * @param User $user User we are grading
 	 * @param array $grades Result from call to getUserGrades
-	 * @return array of arrays, each describing a grader
-	 * @return array of rubrics
+	 * @param array $rubrics Rubrics for this grade, from the rubrics table.
+	 * @return array of arrays, each describing a grade
 	 */
 	public function createGraders(User $grader, User $user, $grades, $rubrics) {
 		$graders = [];

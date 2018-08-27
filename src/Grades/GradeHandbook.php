@@ -17,7 +17,8 @@ class GradeHandbook extends GradePart {
 
 	/**
 	 * Constructor
-	 * \param $multiplier Handbook deduction multiplier
+	 * @param int $multiplier Handbook deduction multiplier
+	 * @param Handbook $handbook The Handbook object that defines the grading.
 	 */
 	public function __construct($multiplier, Handbook $handbook) {
 		parent::__construct(0, '_handbook');
@@ -34,8 +35,6 @@ class GradeHandbook extends GradePart {
 	 * @return string
 	 */
 	public function createStatus($memberId, array $grades) {
-
-
 		return null;
 	}
 

@@ -74,7 +74,7 @@ class GradesApi extends \CL\Users\Api\Resource {
 
 	// /api/grade/rubrics/:assigntag
 	// /api/grade/rubrics/:assigntag/:gradetag
-	public function rubrics(Site $site, User $grader, Server $server, array $params, $time) {
+	private function rubrics(Site $site, User $grader, Server $server, array $params, $time) {
 		$this->atLeast($grader, Member::TA);
 
 		if(count($params) < 2) {
