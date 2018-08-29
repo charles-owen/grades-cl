@@ -60,5 +60,7 @@ class GradeView extends View {
 		$this->addJS('grades');
 		$this->addStaff();
 		$this->addCLS('cl-grade-assignment', json_encode($data));
+
+		$site->amend($this);
 	}
 }

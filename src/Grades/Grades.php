@@ -10,10 +10,8 @@ namespace CL\Grades;
 
 use CL\Tables\Table;
 use CL\Users\User;
-use CL\Site\MetaData;
 use CL\Course\Members;
 use CL\Course\Member;
-use CL\Users\Users;
 
 /** The grade table.
  *

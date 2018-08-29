@@ -37,7 +37,6 @@ The main grading page
             return {
                 section: null,
                 gradingLink: Site.root + '/cl/console/grading/',
-                user: null,
                 ta: Member.TA
 
           }
@@ -46,7 +45,6 @@ The main grading page
             this.$parent.setTitle(': Assignment Grading');
 
             let user = this.$store.state.user.user;
-            this.user = user;
             let member = user.member;
 
             this.section = this.$store.getters['course/section'](member.semester, member.section);

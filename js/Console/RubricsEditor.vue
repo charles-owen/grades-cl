@@ -40,7 +40,6 @@
         props: ['assigntag'],
         data: function() {
             return {
-                user: null,
                 ta: Member.TA,
                 rubrics: []
             }
