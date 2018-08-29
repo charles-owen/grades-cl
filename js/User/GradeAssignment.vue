@@ -22,7 +22,6 @@ The assignment grading page for presentation for a user
           <p class="center small notice">Grades are not available until all parts of the assignment have been graded.</p>
         </template>
       </div>
-      <component :is="reviewing" v-if="reviewing !== null" :json="json"></component>
       <div class="cl-autoback"></div>
     </div>
   </div>
@@ -38,7 +37,6 @@ The assignment grading page for presentation for a user
       props: ['json'],
       data: function() {
       	return {
-      	  reviewing: null
         }
       },
       components: {
@@ -55,10 +53,6 @@ The assignment grading page for presentation for a user
           ];
 
           this.$parent.setMenu(menu);
-
-          if(Site.Review !== undefined) {
-          	this.reviewing = Site.Review.ReviewsVue;
-          }
       }
   }
 </script>

@@ -52,6 +52,7 @@ class GradeView extends View {
 		$data['grades'] = $grading->presentGrades($this->user, $grades);
 		$data['grade'] = $grading->computeGrade($this->user, $grades);
 		$data['assignment'] = [
+			'tag'=>$assignment->tag,
 			'name'=> $assignment->name,
 			'shortName'=>$assignment->shortName
 		];

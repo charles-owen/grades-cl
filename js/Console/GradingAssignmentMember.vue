@@ -26,6 +26,7 @@
               <grade-history :history="item.history"></grade-history>
             </div>
             <submissions :user="fetcher.user" :assigntag="assigntag"></submissions>
+            <component v-if="reviewing !== null" :is="reviewing" :assigntag="assigntag" :user="fetcher.user"></component>
             <div class="grade">
               <p v-if="grade !== null">Computed Grade: {{grade}}</p>
               <template v-else>
@@ -44,152 +45,162 @@
 </template>
 
 <script>
-    import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
-    import PrevNextMemberVue from 'course-cl/js/Console/Members/PrevNextMember.vue';
-    import MemberFetcherComponent from 'course-cl/js/Console/Members/MemberFetcherComponent.vue';
-    import GradeHistoryComponent from '../Util/GradeHistoryComponent.vue';
-    import {TimeFormatter} from 'site-cl/js/TimeFormatter';
-    import SubmissionsAssignmentMemberComponent from 'course-cl/js/Console/SubmissionsAssignmentMemberComponent.vue';
-    import HandbookComponent from '../Handbook/Handbook.vue';
+	/**
+	 * /cl/console/grading/:assignment/:memberid
+	 * Assignment grading page for a course member
+	 */
+	import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
+	import PrevNextMemberVue from 'course-cl/js/Console/Members/PrevNextMember.vue';
+	import MemberFetcherComponent from 'course-cl/js/Console/Members/MemberFetcherComponent.vue';
+	import GradeHistoryComponent from '../Util/GradeHistoryComponent.vue';
+	import {TimeFormatter} from 'site-cl/js/TimeFormatter';
+	import SubmissionsAssignmentMemberComponent from 'course-cl/js/Console/SubmissionsAssignmentMemberComponent.vue';
+	import HandbookComponent from '../Handbook/Handbook.vue';
 
-    export default {
-        'extends': ConsoleComponentBase,
-        props: ['assigntag', 'memberid'],
-        data: function() {
-            return {
-                gradingLink: '/cl/console/grading/' + this.assigntag,
-                assignment: null,
-                graders: [],
-                grade: null,
-                due: null,
-                handbookResult: null
-            }
-        },
-        components: {
-            memberfetcher: MemberFetcherComponent,
-            prevNext: PrevNextMemberVue,
-            gradeHistory: GradeHistoryComponent,
-            submissions: SubmissionsAssignmentMemberComponent,
-            handbook: HandbookComponent
-        },
-        mounted() {
-            this.setTitle(': Grading');
-            this.addNav2('Submit', 2, () => {
-                this.submit();
-            });
+	export default {
+		'extends': ConsoleComponentBase,
+		props: ['assigntag', 'memberid'],
+		data: function () {
+			return {
+				gradingLink: '/cl/console/grading/' + this.assigntag,
+				assignment: null,
+				graders: [],
+				grade: null,
+				due: null,
+				handbookResult: null,
+        reviewing: null
+			}
+		},
+		components: {
+			memberfetcher: MemberFetcherComponent,
+			prevNext: PrevNextMemberVue,
+			gradeHistory: GradeHistoryComponent,
+			submissions: SubmissionsAssignmentMemberComponent,
+			handbook: HandbookComponent
+		},
+		mounted() {
+			this.setTitle(': Grading');
+			this.addNav2('Submit', 2, () => {
+				this.submit();
+			});
 
-            this.addNav2('Submit and Exit', 3, () => {
-                this.submit(true);
-            });
+			this.addNav2('Submit and Exit', 3, () => {
+				this.submit(true);
+			});
 
-            this.addNav2Link('Exit', 4, '/cl/console/grading/' + this.assigntag);
-        },
-        methods: {
-            fetched(user) {
-                let section = user.member.getSection(this.$store);
-                this.assignment = user.member.getAssignment(this.$store, this.assigntag);
-                this.setTitle(': ' + user.name + ' ' + this.assignment.shortname + ' Grading');
+			this.addNav2Link('Exit', 4, '/cl/console/grading/' + this.assigntag);
+		},
+		methods: {
+			fetched(user) {
+				let section = user.member.getSection(this.$store);
+				this.assignment = user.member.getAssignment(this.$store, this.assigntag);
+				this.setTitle(': ' + user.name + ' ' + this.assignment.shortname + ' Grading');
+		    if(this.assignment.review === true) {
+		    	this.reviewing = Console.Console.Review.reviewsbyfor;
+	      }
 
-                Site.api.get(`/api/grade/grader/${this.assigntag}/${this.memberid}`, {})
-                    .then((response) => {
-                        if (!response.hasError()) {
-                            this.take(response);
-                        } else {
-                            Site.toast(this, response);
-                        }
+				Site.api.get(`/api/grade/grader/${this.assigntag}/${this.memberid}`, {})
+					.then((response) => {
+						if (!response.hasError()) {
+							this.take(response);
+						} else {
+							Site.toast(this, response);
+						}
 
-                    })
-                    .catch((error) => {
-                        Site.toast(this, error);
-                    });
-            },
-            submit(exit) {
-                const form = this.$refs['form'];
-                const formData = new FormData(form);
-                if(this.handbookResult !== null) {
-                    formData.append('_handbook', JSON.stringify(this.handbookResult));
-                }
-
-                Site.api.post(`/api/grade/grader/${this.assigntag}/${this.memberid}`, formData)
-                    .then((response) => {
-                        if (!response.hasError()) {
-                            this.take(response);
-
-                            if(exit) {
-                                this.$router.push(Site.root + '/cl/console/grading/' + this.assigntag);
-                            }
-                        } else {
-                            Site.toast(this, response);
-                        }
-
-                    })
-                    .catch((error) => {
-                        Site.toast(this, error);
-                    });
-            },
-            take(response) {
-                const grader = response.getData('grader');
-                this.due = grader.attributes.due !== undefined ? grader.attributes.due : null;
-                this.graders = grader.attributes.graders;
-                this.grade = grader.attributes.grade;
-                this.$forceUpdate();
-
-                setTimeout(() => {
-                    let clickables = document.querySelectorAll('div.cl-clickable li.item');
-                    for(let element of clickables) {
-                        element.addEventListener('click', () => {
-                            this.addContent(element);
-                        });
-                    }
-
-                    clickables = document.querySelectorAll('div.cl-clickable ul.items li');
-                    for(let element of clickables) {
-                        element.addEventListener('click', () => {
-                            this.addContent(element);
-                        });
-                    }
-
-                    clickables = document.querySelectorAll('div.cl-clickable p.item');
-                    for(let element of clickables) {
-                        element.addEventListener('click', () => {
-                            this.addContent(element);
-                        });
-                    }
-                }, 100);
+					})
+					.catch((error) => {
+						Site.toast(this, error);
+					});
 
 
-            },
-            addContent(element) {
-                const content = element.textContent;
+			},
+			submit(exit) {
+				const form = this.$refs['form'];
+				const formData = new FormData(form);
+				if (this.handbookResult !== null) {
+					formData.append('_handbook', JSON.stringify(this.handbookResult));
+				}
 
-                // Work up until we find the cl-grader-item div
-                element = element.parentNode;
-                while(element !== null) {
-                    if(element.classList.contains('cl-grader-item')) {
-                        break;
-                    }
+				Site.api.post(`/api/grade/grader/${this.assigntag}/${this.memberid}`, formData)
+					.then((response) => {
+						if (!response.hasError()) {
+							this.take(response);
 
-                    element = element.parentNode;
-                }
+							if (exit) {
+								this.$router.push(Site.root + '/cl/console/grading/' + this.assigntag);
+							}
+						} else {
+							Site.toast(this, response);
+						}
 
-                if(element === null) {
-                    return;
-                }
+					})
+					.catch((error) => {
+						Site.toast(this, error);
+					});
+			},
+			take(response) {
+				const grader = response.getData('grader');
+				this.due = grader.attributes.due !== undefined ? grader.attributes.due : null;
+				this.graders = grader.attributes.graders;
+				this.grade = grader.attributes.grade;
+				this.$forceUpdate();
 
-                // Find a textarea inside this
-                for(let textarea of element.querySelectorAll('textarea')) {
-                    textarea.value = textarea.value + content + "\n";
-                }
-            },
-            time(t) {
-                return TimeFormatter.absoluteUNIX(t, 'short');
-            },
-            email(user) {
-                window.location = 'mailto:' + user.email;
-            },
-            handbookData(data) {
-                this.handbookResult = data;
-            }
-        }
-    }
+				setTimeout(() => {
+					let clickables = document.querySelectorAll('div.cl-clickable li.item');
+					for (let element of clickables) {
+						element.addEventListener('click', () => {
+							this.addContent(element);
+						});
+					}
+
+					clickables = document.querySelectorAll('div.cl-clickable ul.items li');
+					for (let element of clickables) {
+						element.addEventListener('click', () => {
+							this.addContent(element);
+						});
+					}
+
+					clickables = document.querySelectorAll('div.cl-clickable p.item');
+					for (let element of clickables) {
+						element.addEventListener('click', () => {
+							this.addContent(element);
+						});
+					}
+				}, 100);
+
+
+			},
+			addContent(element) {
+				const content = element.textContent;
+
+				// Work up until we find the cl-grader-item div
+				element = element.parentNode;
+				while (element !== null) {
+					if (element.classList.contains('cl-grader-item')) {
+						break;
+					}
+
+					element = element.parentNode;
+				}
+
+				if (element === null) {
+					return;
+				}
+
+				// Find a textarea inside this
+				for (let textarea of element.querySelectorAll('textarea')) {
+					textarea.value = textarea.value + content + "\n";
+				}
+			},
+			time(t) {
+				return TimeFormatter.absoluteUNIX(t, 'short');
+			},
+			email(user) {
+				window.location = 'mailto:' + user.email;
+			},
+			handbookData(data) {
+				this.handbookResult = data;
+			}
+		}
+	}
 </script>

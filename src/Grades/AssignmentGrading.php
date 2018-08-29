@@ -357,37 +357,7 @@ class AssignmentGrading {
 //	}
 
 
-//	/**
-//	 * Present the reviewing form for this assignment if peer review is active
-//	 * @param \User $user User viewing the form
-//	 * @param \User $gradeUser User being graded
-//	 * @return string HTML
-//	 */
-//	public function reviewing_form(\User $user, \User $gradeUser) {
-//		$html = '';
-//
-//		if($this->assignment->get_reviewing() === null) {
-//			return $html;
-//		}
-//
-//		/*
-//		 * Display any peer reviews
-//		 */
-//		$html .= $this->present_reviews($user, $gradeUser);
-//
-//		/*
-//		 * Display any peer reviewing
-//		 */
-//		$html .= $this->present_reviewing($user, $gradeUser);
-//
-//		$reviewForm = new \Review\ReviewForm($this->assignment->get_course());
-//		$reviewForm->set_staff_review($this->assignment, $gradeUser,
-//			$this->recentSubmissions);
-//		$html .= $reviewForm->present_review_form();
-//
-//		return $html;
-//	}
-//
+
 //	/** Provide a form that presents grades to a user
 //	 * @returns HTML for grade presentation form
 //	 */
