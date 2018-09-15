@@ -5,7 +5,7 @@
       <tr v-for="category in item.handbook.categories">
         <td>
           <template v-if="category.rubric !== undefined">
-            <div class="cl-toggle"><span><a>{{category.name}}</a></span>
+            <div class="cl-toggle cl-single-space"><span><a>{{category.name}}</a></span>
               <div class="cl-rubricblock"><div v-html="category.rubric"></div></div>
             </div>
           </template>
