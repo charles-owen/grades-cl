@@ -14,10 +14,16 @@ div.cl-grader {
     padding: 0 2px;
   }
 
-  p.title {
+  p.cl-title {
     text-align: center;
     font-size: 1.1em;
     font-weight: bold;
+    margin: 1em 0 0 0;
+  }
+
+  p.cl-dispute {
+    text-align: center;
+    margin: 0;
   }
 
   p.cl-role {

@@ -56,6 +56,7 @@ class GradeView extends View {
 			'name'=> $assignment->name,
 			'shortName'=>$assignment->shortName
 		];
+		$data['dispute'] = $this->section->assignments->gradeDispute;
 
 		$this->setTitle('Grade View');
 		$this->addJS('grades');

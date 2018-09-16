@@ -8,7 +8,8 @@ The assignment grading page for presentation for a user
   <div class="content cl-grader">
     <div class="full">
       <div class="cl-autoback"></div>
-      <p class="title">{{json.assignment.name}}</p>
+      <p class="cl-title">{{json.assignment.name}}</p>
+      <p v-if="json.dispute !== null" class="cl-dispute">Please direct all grading issues to <span v-html="json.dispute"></span></p>
       <div v-for="item in json.grades">
         <h2>{{item.name}}</h2>
         <div v-if="item.handbook === undefined"v-html="item.html"></div>

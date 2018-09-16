@@ -280,17 +280,23 @@ class AssignmentGrading {
 
 		foreach($this->gradeParts as $gradePart) {
 			$grade = $gradePart->computeGrade($memberId, $grades);
-			if(!empty($grade['override'])) {
+			if(isset($grade['override'])) {
 				$override = $grade['override'];
 			} else {
 				// If any of the returned values for points is
 				// null, we are not able to yet compute a grade.
-				$points = $grade['points'];
-				if($total !== null && $points !== null) {
-					$total += $points;
-				} else {
-					$total = null;
+				//
+				// The test for existence of the point array element
+				// is protection against errors in GradePart derived components.
+				if(array_key_exists('points', $grade)) {
+					$points = $grade['points'];
+					if($total !== null && $points !== null) {
+						$total += $points;
+					} else {
+						$total = null;
+					}
 				}
+
 			}
 		}
 
@@ -302,17 +308,7 @@ class AssignmentGrading {
 	}
 
 
-//
-//	/** \brief Clear all points for all grading categories
-//	 *
-//	 * This is used prior to loading grades for a given user
-//	 */
-//	public function clear_grades() {
-//		foreach($this->assignmentgrades as $grade) {
-//			$grade->clear_grade();
-//		}
-//	}
-//
+
 //	/** \brief Total points for all grading categories */
 //	public function get_points() {
 //		$points = 0;

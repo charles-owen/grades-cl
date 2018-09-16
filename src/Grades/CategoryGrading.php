@@ -10,6 +10,9 @@ use CL\Users\User;
 
 /**
  * Grading for a category. Attaches to the category object.
+ * @cond
+ * @property int points
+ * @endcond
  */
 class CategoryGrading {
 

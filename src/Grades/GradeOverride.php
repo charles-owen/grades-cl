@@ -80,8 +80,6 @@ HTML;
 	}
 
 
-
-
 	/**
 	 * Post grades for a user
 	 * @param Site $site Site object (for database access)
@@ -90,6 +88,7 @@ HTML;
 	 * @param array $grades Result from call to getUserGrades
 	 * @param array $post $_POST
 	 * @param int $time Current time
+	 * @throws \CL\Site\Api\APIException
 	 */
 	public function postGrader(Site $site, User $grader, User $user, array $grades, array $post, $time) {
 		$grade = $grades[$this->tag];
@@ -156,6 +155,10 @@ HTML;
 
 	/**
 	 * Compute the grade for this assignment
+	 *
+	 * If there is a grade override, the key 'override' is returned
+	 * and the key 'points' is not.
+	 *
 	 * @param int $memberId Member we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array with keys 'points' and optionally 'override'

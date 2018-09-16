@@ -46,7 +46,7 @@ abstract class GradePart {
 	 * useRubric | boolean | false for the base class, override in derived classes
 	 *
 	 * @param string $property Name of the property
-	 * @returns mixed Set value
+	 * @return mixed Set value
 	 */
 	public function __get($property) {
 		switch($property) {
