@@ -1,6 +1,7 @@
 # CourseLib Site user support component
 
-
+The cl/grades package adds a gradebook to the CourseLib 
+web site system.
 
 ***This is a work in progress***
 
