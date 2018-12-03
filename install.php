@@ -4,4 +4,4 @@
  * Used by the site installer
  */
 
-return new CL\Site\Install\Package('\CL\Grades/GradesPlugin', '/dist');
+return new CL\Site\Install\Package('\CL\Grades\GradesPlugin', '/dist');
