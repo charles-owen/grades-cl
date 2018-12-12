@@ -60,7 +60,6 @@ All student grades
             let user = this.$store.state.user.user;
             let member = user.member;
             this.section = this.$store.getters['course/section'](member.semester, member.section);
-            console.log(this.section);
         },
         mounted() {
             this.$parent.setTitle(': Grades');

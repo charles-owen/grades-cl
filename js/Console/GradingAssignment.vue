@@ -1,12 +1,7 @@
-<!--
-@file
-The assignment grading page for the course.
-/cl/console/grading/:assigntag
--->
-
 <template>
   <div class="content cl-grades">
     <div class="full">
+      <submissions-links :assignment="assignment"></submissions-links>
       <membersfetcher>
         <template slot-scope="fetcher">
           <table v-if="grades !== null" class="small">
@@ -35,7 +30,13 @@ The assignment grading page for the course.
 <script>
 	import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
 	import MembersFetcherComponent from 'course-cl/js/Console/Members/MembersFetcherComponent.vue';
+  import SubmissionsLinksVue from 'course-cl/js/Console/SubmissionsLinks.vue';
 
+  /**
+   * The assignment grading page for the course.
+   * /cl/console/grading/:assigntag
+   * @constructor GradingAssignmentVue
+   */
 	export default {
 		extends: ConsoleComponentBase,
 		props: ['assigntag'],
@@ -44,11 +45,13 @@ The assignment grading page for the course.
 				link: Site.root + '/cl/console/grading/' + this.assigntag + '/',
 				grades: null,
 				parts: [],
-        fetched: false
+        fetched: false,
+        assignment: null
 			}
 		},
 		components: {
-			'membersfetcher': MembersFetcherComponent
+			'membersfetcher': MembersFetcherComponent,
+		  'submissionsLinks': SubmissionsLinksVue
 		},
 		mounted() {
 			const member = this.$store.state.user.user.member;
@@ -62,7 +65,7 @@ The assignment grading page for the course.
 
 			this.$parent.setTitle(': ' + this.assignment.shortname + ' Grading');
 
-			Site.api.get('/api/grade/grades/' + this.assigntag, {})
+			this.site.api.get('/api/grade/grades/' + this.assigntag, {})
 				.then((response) => {
 					if (!response.hasError()) {
 						this.grades = response.getData('grades').attributes;

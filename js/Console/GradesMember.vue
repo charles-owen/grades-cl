@@ -35,7 +35,6 @@
     import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
     import PrevNextMemberVue from 'course-cl/js/Console/Members/PrevNextMember.vue';
     import MemberFetcherComponent from 'course-cl/js/Console/Members/MemberFetcherComponent.vue';
-    import {TimeFormatter} from 'site-cl/js/TimeFormatter';
 
     export default {
         extends: ConsoleComponentBase,

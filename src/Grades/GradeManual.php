@@ -89,12 +89,12 @@ class GradeManual extends GradePart {
   </div>
   <div class="points">
     <label>Points
-    <input class="points" value="$points" type="number" name="$this->tag-points">
+    <input class="points" value="$points" type="number" id="$this->tag-points" name="$this->tag-points">
     </label>
   </div>
   <div class="points">
     <div class="label">Available</div>
-    <div class="value">$this->points</div>
+    <div class="value"><a class="available-clicker" data-id="$this->tag-points" title="Click to fill in points">$this->points</a></div>
   </div>
 </div>
 HTML;

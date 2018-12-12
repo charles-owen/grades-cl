@@ -53,7 +53,6 @@
 	import PrevNextMemberVue from 'course-cl/js/Console/Members/PrevNextMember.vue';
 	import MemberFetcherComponent from 'course-cl/js/Console/Members/MemberFetcherComponent.vue';
 	import GradeHistoryComponent from '../Util/GradeHistoryComponent.vue';
-	import {TimeFormatter} from 'site-cl/js/TimeFormatter';
 	import SubmissionsAssignmentMemberComponent from 'course-cl/js/Console/SubmissionsAssignmentMemberComponent.vue';
 	import HandbookComponent from '../Handbook/Handbook.vue';
 
@@ -143,33 +142,38 @@
 				this.due = grader.attributes.due !== undefined ? grader.attributes.due : null;
 				this.graders = grader.attributes.graders;
 				this.grade = grader.attributes.grade;
+
 				this.$forceUpdate();
-
-				setTimeout(() => {
-					let clickables = document.querySelectorAll('div.cl-clickable li.item');
-					for (let element of clickables) {
-						element.addEventListener('click', () => {
-							this.addContent(element);
-						});
-					}
-
-					clickables = document.querySelectorAll('div.cl-clickable ul.items li');
-					for (let element of clickables) {
-						element.addEventListener('click', () => {
-							this.addContent(element);
-						});
-					}
-
-					clickables = document.querySelectorAll('div.cl-clickable p.item');
-					for (let element of clickables) {
-						element.addEventListener('click', () => {
-							this.addContent(element);
-						});
-					}
-				}, 100);
-
-
+				this.$nextTick(() => {
+			    this.installAvailableClickers();
+					this.installRubricClickers();
+				});
 			},
+      /// Install clicker for available that will autofill the points
+      installAvailableClickers() {
+        let clickables = document.querySelectorAll('div.cl-grader div.grader a.available-clicker');
+        for(const element of clickables) {
+          element.addEventListener('click', () => {
+            document.getElementById(element.dataset.id).value = element.innerText;
+          });
+        }
+      },
+      /// Install clickers for Rubric items that will autofill them.
+      installRubricClickers() {
+				const selectors = ['div.cl-clickable li.item', 'div.cl-clickable ul.items li', 'div.cl-clickable p.item'];
+				for(const selector of selectors) {
+          const clickables = document.querySelectorAll(selector);
+          for (let element of clickables) {
+          	if(element.dataset.clickable === undefined) {
+	            element.addEventListener('click', () => {
+		            this.addContent(element);
+	            });
+	            element.setAttribute('data-clickable', 'yes');
+            }
+          }
+        }
+      },
+      /// Add rubric content to the element comment textarea
 			addContent(element) {
 				const content = element.textContent;
 
@@ -193,7 +197,8 @@
 				}
 			},
 			time(t) {
-				return TimeFormatter.absoluteUNIX(t, 'short');
+				console.log(this.$site);
+				return this.$site.TimeFormatter.absoluteUNIX(t, 'short');
 			},
 			email(user) {
 				window.location = 'mailto:' + user.email;

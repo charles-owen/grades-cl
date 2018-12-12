@@ -17,8 +17,6 @@
 </template>
 
 <script>
-  import {TimeFormatter} from 'site-cl/js/TimeFormatter';
-
   export default {
       props: ['history'],
       data: function() {
@@ -39,7 +37,7 @@
       methods: {
           display(history) {
               const grader = this.$store.getters['course/staff'](history.grader);
-              let str = TimeFormatter.absoluteUNIX(history.time, 'short') +
+              let str = this.$site.TimeFormatter.absoluteUNIX(history.time, 'short') +
                       ' by ' +
                       grader.displayName();
 
