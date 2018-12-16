@@ -185,7 +185,7 @@ class CategoryGrading {
 			'name'=>$this->category->name,
 			'points'=>$this->points,
 			'assignments'=>$grades,
-			'grade'=>$total,
+			'grade'=>round($total, 1),
 			'available'=>$available];
 
 		return $data;

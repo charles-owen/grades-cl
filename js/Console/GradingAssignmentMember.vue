@@ -9,6 +9,7 @@
             <form ref="form" method="post" @submit.prevent="submit">
               <p :class="fetcher.user.role() === 'T' ? 'cl-role' : 'cl-role cl-role-staff'">
               {{fetcher.user.roleName()}}: {{fetcher.user.name}} {{fetcher.user.role()}}
+                <em class="small">{{fetcher.user.userId}}</em>
                 <button class="cl-grader-button" @click.prevent="email(fetcher.user)">
                   email {{fetcher.user.roleName().toLowerCase()}}</button>
                 <router-link class="cl-grader-button" tag="button" :to="root + '/cl/console/grades/' + fetcher.user.member.id">student grades</router-link>
@@ -95,7 +96,7 @@
 				this.assignment = user.member.getAssignment(this.$store, this.assigntag);
 				this.setTitle(': ' + user.name + ' ' + this.assignment.shortname + ' Grading');
 		    if(this.assignment.review === true) {
-		    	this.reviewing = Console.Console.Review.reviewsbyfor;
+		    	this.reviewing = this.$site.console.Review.reviewsbyfor;
 	      }
 
 				Site.api.get(`/api/grade/grader/${this.assigntag}/${this.memberid}`, {})

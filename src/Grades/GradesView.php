@@ -40,8 +40,8 @@ class GradesView extends View {
 
 		$data = [
 			'categories' => $grades,
-			'grade' => $total,
-			'available'=>$available
+			'grade' => round($total, 1),
+			'available'=>round($available, 1)
 		];
 
 		$this->setTitle('Grades for ' . $this->user->displayName);

@@ -177,8 +177,8 @@ class GradesApi extends \CL\Users\Api\Resource {
 			$data[$user->member->id] = [
 				'member'=>$user->member->id,
 				'categories' => $grades,
-				'grade' => $total,
-				'available'=>$available
+				'grade' => round($total, 1),
+				'available'=> round($available, 1)
 			];
 		}
 
@@ -236,8 +236,8 @@ class GradesApi extends \CL\Users\Api\Resource {
 
 		$data = [
 			'categories' => $grades,
-			'grade' => $total,
-			'available'=>$available
+			'grade' => round($total, 1),
+			'available'=> round($available, 1)
 		];
 
 		$json = new JsonAPI();

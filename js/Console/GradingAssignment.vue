@@ -16,8 +16,20 @@
               <td><router-link :to="link + user.member.id">{{user.userId}}</router-link></td>
               <td><router-link :to="link + user.member.id">{{user.name}}</router-link></td>
               <td class="role">{{user.roleName()}}</td>
-              <td v-for="part in parts">{{partGrade(user, part)}}</td>
-              <td v-if="grades !== null">{{grade(user)}}</td>
+              <td v-for="part in parts" class="right">{{partGrade(user, part)}}</td>
+              <td v-if="grades !== null" class="right">{{grade(user)}}</td>
+            </tr>
+            <tr class="divider">
+              <td colspan="2" class="center"><em>counts</em></td>
+              <td class="center">{{fetcher.users.length}}</td>
+              <td v-for="part in parts" class="right">{{partCount(fetcher.users, part)}}</td>
+              <td v-if="grades !== null" class="right">{{gradesCount(fetcher.users)}}</td>
+            </tr>
+            <tr>
+              <td colspan="2" class="center"><em>averages</em></td>
+              <td class="center">&nbsp;</td>
+              <td v-for="part in parts" class="right">{{partAverage(fetcher.users, part)}}</td>
+              <td v-if="grades !== null" class="right">{{gradeAverage(fetcher.users)}}</td>
             </tr>
           </table>
         </template>
@@ -79,6 +91,7 @@
 					Site.toast(this, error);
 				});
 
+
 		},
 		methods: {
 			partGrade(user, part) {
@@ -101,7 +114,61 @@
 				}
 
 				return userGrades.grade !== null ? userGrades.grade : '';
-			}
+			},
+      partCount(users, part) {
+				let cnt = 0;
+				for(let user of users) {
+					if(this.partGrade(user, part) !== '') {
+						cnt++;
+          }
+        }
+
+        return cnt;
+      },
+      gradesCount(users) {
+	      let cnt = 0;
+	      for(let user of users) {
+		      if(this.grade(user) !== '') {
+			      cnt++;
+		      }
+	      }
+
+	      return cnt;
+      },
+      partAverage(users, part) {
+        let cnt = 0;
+        let total = 0;
+        for(let user of users) {
+        	let grade = this.partGrade(user, part);
+          if(grade !== '') {
+            cnt++;
+            total += grade;
+          }
+        }
+
+        if(cnt === 0) {
+        	return '';
+        }
+
+        return Math.round(total/cnt * 10) / 10;
+      },
+      gradeAverage(users) {
+        let cnt = 0;
+        let total = 0;
+        for(let user of users) {
+          let grade = this.grade(user);
+          if(grade !== '') {
+            cnt++;
+            total += grade;
+          }
+        }
+
+        if(cnt === 0) {
+          return '';
+        }
+
+        return Math.round(total/cnt * 10) / 10;
+      }
 		}
 	}
 </script>
