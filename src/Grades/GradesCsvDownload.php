@@ -91,6 +91,7 @@ class GradesCsvDownload extends View {
 				$row[] = $categoryGrades['grade'];
 			}
 
+			$total = round($total, 1);
 			$row[] = $total;
 
 			$row[] = $this->section->grading->toGrade($total);
@@ -98,56 +99,7 @@ class GradesCsvDownload extends View {
 			fputcsv($fp, $row);
 		}
 
-//		/*
-//		 * Create the table rows
-//		 */
-//		$selected = $section->get_id();
-//		$users = new \Users($this->course);
-//		foreach($users->get_users($section, "name") as $user) {
-//			if($this->studentsOnly && $user->get_role() !== \User::STUDENT) {
-//				continue;
-//			}
-//
-//
-//			$userid = $user->get_userid();
-//			$name = $user->get_name();
-//			$row = array($userid, $name);
-//
-//			$total = 0;
-//			foreach($assignments->get_categories() as $category) {
-//				$name = $category->get_name();
-//				$percent = $category->get_percent();
-//				$catgrade = $category->compute_grade($user);
-//
-//				$total += $percent * 0.01 * $catgrade;
-//
-//				foreach($category->get_assignments() as $assignment) {
-//					$name = $assignment->get_name();
-//					$percent = round($assignment->get_percent(), 1);
-//					$tag = $assignment->get_tag();
-//
-//					$grade = $assignment->get_grading()->get_grade();
-//					if($grade === null) {
-//						$row[] = 0;
-//					} else {
-//						$row[] = round($grade, 1);
-//					}
-//				}
-//
-//				$row[] = $catgrade;
-//			}
-//
-//			$total = round($total, 1);
-//			$grade = $section->to_grade($total);
-//			$row[] = $total;
-//			$row[] = $grade;
-//
-//			fputcsv($fp, $row);
-//		}
-
 		fclose($fp);
-
-
 		return '';
 	}
 
