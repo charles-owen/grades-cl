@@ -39,14 +39,16 @@ class GradeOverride extends GradePart {
 	}
 
 
+
 	/**
 	 * Create the grading form for staff use
-	 * @param int $memberId Member we are grading
+	 * @param Site $site The Site object
+	 * @param User $user User we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array describing a grader
 	 */
-	public function createGrader($memberId, array $grades) {
-		$data = parent::createGrader($memberId, $grades);
+	public function createGrader(Site $site, User $user, array $grades) {
+		$data = parent::createGrader($site, $user, $grades);
 
 		$grade = $grades[$this->tag];
 		$points = $grade->points !== null ? $grade->points : '';
@@ -240,25 +242,5 @@ HTML;
 //
 //		$this->grading->post_grade($user, $this->tag, $points, $comment);
 //	}
-//
-//	/** Clear the grade information */
-//	public function clear_grade() {
-//		parent::clear_grade();
-//		$this->comment = '';
-//	}
-//
-//
-//	/** Load the grade information from the database row */
-//	public function load_grade($row) {
-//		parent::load_grade($row);
-//
-//		$points = $row['grade'];
-//		$this->comment = $row['comment'];
-//
-//		if($points != "") {
-//			$this->set_grade($points);
-//		} else {
-//			$this->set_grade(null);
-//		}
-//	}
+
 }

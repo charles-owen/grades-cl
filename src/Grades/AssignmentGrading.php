@@ -5,6 +5,7 @@
 
 namespace CL\Grades;
 
+use CL\Site\Site;
 use CL\Users\User;
 
 /**
@@ -207,20 +208,21 @@ class AssignmentGrading {
 
 	/**
 	 * Create the grading forms for staff use
+	 * @param Site $site Site object
 	 * @param User $grader User doing the grading
 	 * @param User $user User we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @param array $rubrics Rubrics for this grade, from the rubrics table.
 	 * @return array of arrays, each describing a grade
 	 */
-	public function createGraders(User $grader, User $user, $grades, $rubrics) {
+	public function createGraders(Site $site, User $grader, User $user, $grades, $rubrics) {
 		$graders = [];
 
 		/*
 		 * Create the HTML form for each grade part
 		 */
 		foreach($this->gradeParts as $gradeItem) {
-			$data = $gradeItem->createGrader($user->member->id, $grades);
+			$data = $gradeItem->createGrader($site, $user, $grades);
 			if(isset($rubrics[$gradeItem->tag])) {
 				$data['rubric'] = $rubrics[$gradeItem->tag];
 			}

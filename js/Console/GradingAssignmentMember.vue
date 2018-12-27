@@ -148,7 +148,10 @@
 				this.$nextTick(() => {
 			    this.installAvailableClickers();
 					this.installRubricClickers();
+			    this.$site.message('cl-grades-grader-installed');
 				});
+
+
 			},
       /// Install clicker for available that will autofill the points
       installAvailableClickers() {
@@ -198,7 +201,6 @@
 				}
 			},
 			time(t) {
-				console.log(this.$site);
 				return this.$site.TimeFormatter.absoluteUNIX(t, 'short');
 			},
 			email(user) {

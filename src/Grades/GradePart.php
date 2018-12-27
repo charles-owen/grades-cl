@@ -126,11 +126,12 @@ abstract class GradePart {
 
 	/**
 	 * Create the grading form for staff use
-	 * @param int $memberId Member we are grading
+	 * @param Site $site The Site object
+	 * @param User $user User we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array describing a grader
 	 */
-	public function createGrader($memberId, array $grades) {
+	public function createGrader(Site $site, User $user, array $grades) {
 
 		$data = [
 			'tag'=>$this->tag,

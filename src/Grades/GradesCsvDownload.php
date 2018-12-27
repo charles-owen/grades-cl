@@ -23,7 +23,7 @@ class GradesCsvDownload extends View {
 	 * @param int $time Current time
 	 */
 	public function __construct(Site $site, Server $server, $time) {
-		parent::__construct($site, ['atLeast'=>Member::TA]);
+		parent::__construct($site, ['at-least'=>Member::TA]);
 
 		$this->server = $server;
 		$this->time = $time;

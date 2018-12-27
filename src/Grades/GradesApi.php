@@ -362,7 +362,7 @@ class GradesApi extends \CL\Users\Api\Resource {
 		$rubricsTable = new Rubrics($site->db);
 		$rubrics = $rubricsTable->get($member->semester, $member->sectionId, $assignment->tag);
 
-		$data['graders'] = $grading->createGraders($grader, $user, $grades, $rubrics);
+		$data['graders'] = $grading->createGraders($site, $grader, $user, $grades, $rubrics);
 
 		$data['grade'] = $grading->computeGrade($memberId, $grades);
 

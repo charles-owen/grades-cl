@@ -38,14 +38,17 @@ class GradeHandbook extends GradePart {
 		return null;
 	}
 
+
 	/**
 	 * Create the grading form for staff use
-	 * @param int $memberId Member we are grading
+	 * @param Site $site The Site object
+	 * @param User $user User we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array describing a grader
 	 */
-	public function createGrader($memberId, array $grades) {
-		$data = parent::createGrader($memberId, $grades);
+	public function createGrader(Site $site, User $user, array $grades) {
+		$data = parent::createGrader($site, $user, $grades);
+
 		$grade = $grades[$this->tag];
 
 		$data['handbook'] = $this->handbook->data(true);

@@ -68,12 +68,15 @@ class GradeManual extends GradePart {
 
 	/**
 	 * Create the grading form for staff use
-	 * @param int $memberId Member we are grading
+	 * @param Site $site The Site object
+	 * @param User $user User we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array describing a grader
 	 */
-	public function createGrader($memberId, array $grades) {
-		$data = parent::createGrader($memberId, $grades);
+	public function createGrader(Site $site, User $user, array $grades) {
+		$data = parent::createGrader($site, $user, $grades);
+
+		$memberId = $user->member->id;
 
 		$grade = $grades[$this->tag];
 		$points = $grade->points !== null ? $grade->points : '';
@@ -145,6 +148,7 @@ HTML;
 	 * @param array $grades Result from call to getUserGrades
 	 * @param array $post $_POST
 	 * @param int $time Current time
+	 * @throws \CL\Site\Api\APIException
 	 */
 	public function postGrader(Site $site, User $grader, User $user, array $grades, array $post, $time) {
 		$grade = $grades[$this->tag];
