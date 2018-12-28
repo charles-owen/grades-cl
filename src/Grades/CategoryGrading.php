@@ -6,12 +6,15 @@
 
 namespace CL\Grades;
 
+use CL\Course\AssignmentCategory;
 use CL\Users\User;
 
 /**
  * Grading for a category. Attaches to the category object.
  * @cond
  * @property int points
+ * @property int dropLowest
+ * @property AssignmentCategory category
  * @endcond
  */
 class CategoryGrading {
@@ -148,7 +151,7 @@ class CategoryGrading {
 				return $grades[$a]['applied'] - $grades[$b]['applied'];
 			});
 
-			for($i=0; $i<$this->droplowest; $i++) {
+			for($i=0; $i<$this->dropLowest; $i++) {
 				$grades[$indicies[$i]]['drop'] = true;
 			}
 		}
