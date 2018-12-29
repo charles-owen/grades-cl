@@ -39,7 +39,7 @@ GradesConsole.install = function(Console) {
 
     Console.tables.add({
         title: 'Grades',
-        order: 11,
+        order: 40,
         api: '/api/grade/tables'
     });
 }
