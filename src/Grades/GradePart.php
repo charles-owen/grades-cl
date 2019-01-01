@@ -30,7 +30,7 @@ abstract class GradePart {
 	public function __construct($points, $tag, $name = null) {
 		$this->points = $points;
 		$this->tag = $tag;
-		$this->name   = $name;
+		$this->name = $name;
 	}
 
 
@@ -62,6 +62,9 @@ abstract class GradePart {
 			case 'useRubric':
 				return false;
 
+			case 'grading':
+				return $this->grading;
+
 			default:
 				$trace = debug_backtrace();
 				trigger_error(
@@ -87,6 +90,10 @@ abstract class GradePart {
 		switch($property) {
 			case 'name':
 				$this->name = $value;
+				break;
+
+			case 'grading':
+				$this->grading = $value;
 				break;
 
 			default:
@@ -235,6 +242,7 @@ abstract class GradePart {
 //	public function get_view_aux() {return null;}
 
 
+	private $grading = null;    // AssignmentGrading owner of this grade part
 	private   $name;        // Name of the grade item
 	protected $points;	    ///< int Number of points for this part of the grade
 	protected $tag;		    ///< The grade item tag

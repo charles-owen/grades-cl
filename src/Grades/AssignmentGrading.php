@@ -23,12 +23,6 @@ use CL\Users\User;
  */
 class AssignmentGrading {
 	/**
-	 * Constructor
-	 */
-	public function __construct() {
-	}
-
-	/**
 	 * Property get magic method
 	 *
 	 * <b>Properties</b>
@@ -104,6 +98,7 @@ class AssignmentGrading {
 	 */
 	public function add(GradePart $grade) {
 		$this->gradeParts[] = $grade;
+		$grade->grading = $this;
 		return $grade;
 	}
 
