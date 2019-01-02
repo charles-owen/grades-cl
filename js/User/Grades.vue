@@ -1,9 +1,3 @@
-<!--
-@file
-The course grading page for presentation of all grades for a user
-/cl/grades
--->
-
 <template>
   <div class="content cl-grader">
     <div class="full">
@@ -34,7 +28,14 @@ The course grading page for presentation of all grades for a user
 </template>
 
 <script>
-    import UserVueBase from 'users-cl/js/Vue/UserVueBase.vue';
+    const UserVueBase = Site.UserVueBase;
+
+    /**
+     * The course grading page for presentation of all grades for a user
+     *
+     * /cl/grades
+     * @constructor GradesVue
+     */
 
     export default {
         'extends': UserVueBase,

@@ -3,6 +3,8 @@ tests/config.php
 /html
 /vendor
 
+doc/js
+
 # IDEs and editors
 /.idea
 .project

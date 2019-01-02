@@ -32,8 +32,10 @@
 
 <script>
     import {Member} from 'course-cl/js/Members/Member';
-    import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
     import RubricEditorVue from './RubricEditor.vue';
+
+    const ConsoleComponentBase = Site.ConsoleComponentBase;
+
 
     export default {
         'extends': ConsoleComponentBase,

@@ -1,10 +1,3 @@
-/**
- * @file
- * Install into the grades console system.
- */
-
-import {Member} from 'course-cl/js/Members/Member';
-
 import GradingVue from './Grading.vue';
 import GradingAssignmentVue from './GradingAssignment.vue';
 import GradingAssignmentMemberVue from './GradingAssignmentMember.vue'
@@ -13,9 +6,21 @@ import GradesAllVue from './GradesAll.vue';
 import GradesMemberVue from './GradesMember.vue';
 import RubricsEditorVue from './RubricsEditor.vue';
 
+const Member = Site.Member;
+
+/**
+ * The grades console component.
+ *
+ * Handles installations in the console system.
+ * @constructor
+ */
 export const GradesConsole = function() {
 }
 
+/**
+ * Install functionality into the console system.
+ * @param Console
+ */
 GradesConsole.install = function(Console) {
     Console.components.addOption({
         atLeast: Member.GRADER,

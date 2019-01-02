@@ -32,9 +32,10 @@
 </template>
 
 <script>
-    import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
     import PrevNextMemberVue from 'course-cl/js/Console/Members/PrevNextMember.vue';
     import MemberFetcherComponent from 'course-cl/js/Console/Members/MemberFetcherComponent.vue';
+
+    const ConsoleComponentBase = Site.ConsoleComponentBase;
 
     export default {
         extends: ConsoleComponentBase,

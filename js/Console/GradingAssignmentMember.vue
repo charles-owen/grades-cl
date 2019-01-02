@@ -46,17 +46,19 @@
 </template>
 
 <script>
+	import GradeHistoryComponentVue from '../Util/GradeHistoryComponent.vue';
+	import HandbookComponentVue from '../Handbook/Handbook.vue';
+
+	const ConsoleComponentBase = Site.ConsoleComponentBase;
+	const PrevNextMemberVue = Site.PrevNextMemberVue;
+	const MemberFetcherComponentVue = Site.MemberFetcherComponentVue;
+	const SubmissionsAssignmentMemberComponentVue = Site.SubmissionsAssignmentMemberComponentVue;
+
 	/**
 	 * /cl/console/grading/:assignment/:memberid
 	 * Assignment grading page for a course member
+   * @constructor GradingAssignmentMemberVue
 	 */
-	import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
-	import PrevNextMemberVue from 'course-cl/js/Console/Members/PrevNextMember.vue';
-	import MemberFetcherComponent from 'course-cl/js/Console/Members/MemberFetcherComponent.vue';
-	import GradeHistoryComponent from '../Util/GradeHistoryComponent.vue';
-	import SubmissionsAssignmentMemberComponent from 'course-cl/js/Console/SubmissionsAssignmentMemberComponent.vue';
-	import HandbookComponent from '../Handbook/Handbook.vue';
-
 	export default {
 		'extends': ConsoleComponentBase,
 		props: ['assigntag', 'memberid'],
@@ -68,15 +70,15 @@
 				grade: null,
 				due: null,
 				handbookResult: null,
-        reviewing: null
+				reviewing: null
 			}
 		},
 		components: {
-			memberfetcher: MemberFetcherComponent,
+			memberfetcher: MemberFetcherComponentVue,
 			prevNext: PrevNextMemberVue,
-			gradeHistory: GradeHistoryComponent,
-			submissions: SubmissionsAssignmentMemberComponent,
-			handbook: HandbookComponent
+			gradeHistory: GradeHistoryComponentVue,
+			submissions: SubmissionsAssignmentMemberComponentVue,
+			handbook: HandbookComponentVue
 		},
 		mounted() {
 			this.setTitle(': Grading');
@@ -95,21 +97,21 @@
 				let section = user.member.getSection(this.$store);
 				this.assignment = user.member.getAssignment(this.$store, this.assigntag);
 				this.setTitle(': ' + user.name + ' ' + this.assignment.shortname + ' Grading');
-		    if(this.assignment.review === true) {
-		    	this.reviewing = this.$site.console.Review.reviewsbyfor;
-	      }
+				if (this.assignment.review === true) {
+					this.reviewing = this.$site.console.Review.reviewsbyfor;
+				}
 
-				Site.api.get(`/api/grade/grader/${this.assigntag}/${this.memberid}`, {})
+				this.$site.api.get(`/api/grade/grader/${this.assigntag}/${this.memberid}`, {})
 					.then((response) => {
 						if (!response.hasError()) {
 							this.take(response);
 						} else {
-							Site.toast(this, response);
+							this.$site.toast(this, response);
 						}
 
 					})
 					.catch((error) => {
-						Site.toast(this, error);
+						this.$site.toast(this, error);
 					});
 
 
@@ -121,21 +123,21 @@
 					formData.append('_handbook', JSON.stringify(this.handbookResult));
 				}
 
-				Site.api.post(`/api/grade/grader/${this.assigntag}/${this.memberid}`, formData)
+				this.$site.api.post(`/api/grade/grader/${this.assigntag}/${this.memberid}`, formData)
 					.then((response) => {
 						if (!response.hasError()) {
 							this.take(response);
 
 							if (exit) {
-								this.$router.push(Site.root + '/cl/console/grading/' + this.assigntag);
+								this.$router.push(this.$site.root + '/cl/console/grading/' + this.assigntag);
 							}
 						} else {
-							Site.toast(this, response);
+							this.$site.toast(this, response);
 						}
 
 					})
 					.catch((error) => {
-						Site.toast(this, error);
+						this.$site.toast(this, error);
 					});
 			},
 			take(response) {
@@ -146,38 +148,38 @@
 
 				this.$forceUpdate();
 				this.$nextTick(() => {
-			    this.installAvailableClickers();
+					this.installAvailableClickers();
 					this.installRubricClickers();
-			    this.$site.message('cl-grades-grader-installed');
+					this.$site.message('cl-grades-grader-installed');
 				});
 
 
 			},
-      /// Install clicker for available that will autofill the points
-      installAvailableClickers() {
-        let clickables = document.querySelectorAll('div.cl-grader div.grader a.available-clicker');
-        for(const element of clickables) {
-          element.addEventListener('click', () => {
-            document.getElementById(element.dataset.id).value = element.innerText;
-          });
-        }
-      },
-      /// Install clickers for Rubric items that will autofill them.
-      installRubricClickers() {
+			/// Install clicker for available that will autofill the points
+			installAvailableClickers() {
+				let clickables = document.querySelectorAll('div.cl-grader div.grader a.available-clicker');
+				for (const element of clickables) {
+					element.addEventListener('click', () => {
+						document.getElementById(element.dataset.id).value = element.innerText;
+					});
+				}
+			},
+			/// Install clickers for Rubric items that will autofill them.
+			installRubricClickers() {
 				const selectors = ['div.cl-clickable li.item', 'div.cl-clickable ul.items li', 'div.cl-clickable p.item'];
-				for(const selector of selectors) {
-          const clickables = document.querySelectorAll(selector);
-          for (let element of clickables) {
-          	if(element.dataset.clickable === undefined) {
-	            element.addEventListener('click', () => {
-		            this.addContent(element);
-	            });
-	            element.setAttribute('data-clickable', 'yes');
-            }
-          }
-        }
-      },
-      /// Add rubric content to the element comment textarea
+				for (const selector of selectors) {
+					const clickables = document.querySelectorAll(selector);
+					for (let element of clickables) {
+						if (element.dataset.clickable === undefined) {
+							element.addEventListener('click', () => {
+								this.addContent(element);
+							});
+							element.setAttribute('data-clickable', 'yes');
+						}
+					}
+				}
+			},
+			/// Add rubric content to the element comment textarea
 			addContent(element) {
 				const content = element.textContent;
 

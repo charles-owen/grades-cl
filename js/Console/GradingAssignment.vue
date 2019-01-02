@@ -40,9 +40,11 @@
 </template>
 
 <script>
-	import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
 	import MembersFetcherComponent from 'course-cl/js/Console/Members/MembersFetcherComponent.vue';
   import SubmissionsLinksVue from 'course-cl/js/Console/SubmissionsLinks.vue';
+
+  const ConsoleComponentBase = Site.ConsoleComponentBase;
+
 
   /**
    * The assignment grading page for the course.

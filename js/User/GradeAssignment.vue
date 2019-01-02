@@ -1,18 +1,12 @@
-<!--
-@file
-The assignment grading page for presentation for a user
-/cl/grade/:assignment
--->
-
 <template>
   <div class="content cl-grader">
     <div class="full">
       <div class="cl-autoback"></div>
       <p class="cl-title">{{json.assignment.name}}</p>
       <p v-if="json.dispute !== null" class="cl-dispute">Please direct all grading issues to <span v-html="json.dispute"></span></p>
-      <div v-for="item in json.grades">
+      <div v-for="item in json.grades" v-if="item.html !== undefined">
         <h2>{{item.name}}</h2>
-        <div v-if="item.handbook === undefined"v-html="item.html"></div>
+        <div v-if="item.handbook === undefined" v-html="item.html"></div>
         <handbook v-else :item="item" readonly="true"></handbook>
        <grade-history :history="item.history"></grade-history>
       </div>
@@ -29,31 +23,36 @@ The assignment grading page for presentation for a user
 </template>
 
 <script>
-  import GradeHistoryComponent from '../Util/GradeHistoryComponent.vue';
-  import UserVueBase from 'users-cl/js/Vue/UserVueBase.vue';
-  import HandbookComponent from '../Handbook/Handbook.vue';
+	import GradeHistoryComponent from '../Util/GradeHistoryComponent.vue';
+	import HandbookComponent from '../Handbook/Handbook.vue';
 
-  export default {
-      'extends': UserVueBase,
-      props: ['json'],
-      data: function() {
-      	return {
-        }
-      },
-      components: {
-          gradeHistory: GradeHistoryComponent,
-          handbook: HandbookComponent
-      },
-      mounted() {
-          this.$parent.setTitle(':  ' + this.json.assignment.shortName + ' Grade for ' + this.user.displayName());
+	const UserVueBase = Site.UserVueBase;
 
-          const menu = [
-              {name: 'Grades', click: () => {
-                  window.location = Site.root = '/cl/grades';
-              }}
-          ];
+	/**
+	 * The assignment grading page for presentation for a user
+	 *
+	 * /cl/grade/:assignment
+	 * @constructor GradeAssignmentVue
+	 */
+	export default {
+		'extends': UserVueBase,
+		props: ['json'],
+		components: {
+			gradeHistory: GradeHistoryComponent,
+			handbook: HandbookComponent
+		},
+		mounted() {
+			this.$parent.setTitle(':  ' + this.json.assignment.shortName + ' Grade for ' + this.user.displayName());
 
-          this.$parent.setMenu(menu);
-      }
-  }
+			const menu = [
+				{
+					name: 'Grades', click: () => {
+						window.location = Site.root = '/cl/grades';
+					}
+				}
+			];
+
+			this.$parent.setMenu(menu);
+		}
+	}
 </script>

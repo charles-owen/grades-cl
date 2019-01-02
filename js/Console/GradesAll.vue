@@ -41,8 +41,10 @@ All student grades
 </template>
 
 <script>
-    import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
     import MembersFetcherComponent from 'course-cl/js/Console/Members/MembersFetcherComponent.vue';
+
+    const ConsoleComponentBase = Site.ConsoleComponentBase;
+
 
     export default {
         'extends': ConsoleComponentBase,

@@ -29,9 +29,11 @@ The main grading page
 
 <script>
   import {Member} from 'course-cl/js/Members/Member';
-  import ConsoleComponentBase from 'console-cl/js/ConsoleComponentBase.vue';
 
-    export default {
+  const ConsoleComponentBase = Site.ConsoleComponentBase;
+
+
+  export default {
         'extends': ConsoleComponentBase,
         data: function() {
             return {

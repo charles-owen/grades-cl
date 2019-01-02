@@ -7,6 +7,9 @@
     "Education",
     "LTI"
   ],
+  "scripts": {
+    "build:docs": "documentation build js/**/*.vue js/**/*.js --sort-order alpha -f html -o doc/js"
+  },
   "author": "Charles B. Owen",
   "license": "MIT",
   "dependencies": {
