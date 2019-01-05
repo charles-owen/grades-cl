@@ -61,12 +61,14 @@ class GradeHandbook extends GradePart {
 
 	/**
 	 * Create the grading presentation for students
-	 * @param int $memberId Member we are grading
+	 * @param Site $site The Site object
+	 * @param User $user User we are grading
 	 * @param array $grades Result from call to getUserGrades
 	 * @return array of arrays, each describing a grader
 	 */
-	public function presentGrade($memberId, array $grades) {
-		$data = parent::presentGrade($memberId, $grades);
+	public function presentGrade(Site $site, User $user, array $grades) {
+		$data = parent::presentGrade($site, $user, $grades);
+
 		$grade = $grades[$this->tag];
 
 		$data['handbook'] = $this->handbook->data(false);

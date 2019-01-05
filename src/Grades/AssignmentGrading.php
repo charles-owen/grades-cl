@@ -115,6 +115,15 @@ class AssignmentGrading {
 	}
 
 
+	/**
+	 * Add a comment grading component to an assignment
+	 * @param string $name Name of the grade
+	 * @return GradePart object
+	 */
+	public function add_comment($name) {
+		return $this->add(new GradeComment($name));
+	}
+
 
 	/**
 	 * Add course Handbook grading to an assignment
@@ -236,10 +245,11 @@ class AssignmentGrading {
 	 * @return array of arrays, each describing a grader
 	 */
 	public function presentGrades(User $user, $grades) {
+		$site = $this->assignment->site;
 		$presented = [];
 
 		foreach($this->gradeParts as $gradeItem) {
-			$grading = $gradeItem->presentGrade($user->member->id, $grades);
+			$grading = $gradeItem->presentGrade($site, $user, $grades);
 			if($grading !== null) {
 				// Some grade parts may be skipped.
 				// For example, an override grade only appears if used.
