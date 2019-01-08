@@ -18,14 +18,11 @@ class GradeComment extends GradePart {
 
 	/**
 	 * Constructor
-	 * \param $points The maximum possible points for this category
-	 * \param $name A category name for display
+	 * @param $name A category name for display
 	 */
 	public function __construct($name) {
 		parent::__construct(0, null);
 		$this->__set("name", $name);
-
-
 	}
 
 

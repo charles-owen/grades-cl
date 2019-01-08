@@ -7,6 +7,7 @@ namespace CL\Grades;
 
 use CL\Users\User;
 use CL\Site\Site;
+use CL\Site\Api\APIException;
 
 /**
  * Manually entered grades
@@ -149,7 +150,7 @@ HTML;
 	 * @param array $grades Result from call to getUserGrades
 	 * @param array $post $_POST
 	 * @param int $time Current time
-	 * @throws \CL\Site\Api\APIException
+	 * @throws APIException
 	 */
 	public function postGrader(Site $site, User $grader, User $user, array $grades, array $post, $time) {
 		$grade = $grades[$this->tag];
