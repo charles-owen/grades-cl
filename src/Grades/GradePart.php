@@ -1,6 +1,6 @@
 <?php
 /** @file
- * Base class for a grade item for assignments
+ * Base class for a part of a grade for assignments
  */
 
 namespace CL\Grades;
@@ -10,12 +10,20 @@ use CL\Site\Api\APIException;
 use CL\Users\User;
 
 /**
- * Base class for a grade item for assignments
+ * Base class for a part of a grade for assignments
  *
- * A grade item is the definition of one part of a grade for an assignment. For example,
+ * A grade part is the definition of one part of a grade for an assignment. For example,
  * an assignment might have a quiz grade and two manual grades.
  * 
  * Derived classes will specialize this for specific categories
+ *
+ * @cond
+ * @property string name
+ * @property int points
+ * @property string tag
+ * @property boolean useRubric
+ * @property AssignmentGrading grading
+ * @endcond
  */
 abstract class GradePart {
 
@@ -43,7 +51,8 @@ abstract class GradePart {
 	 * name | string | Name of the grading item (can be null)
 	 * points | int | Points assigned to this grading item
 	 * tag | string | Tag that identifies this grading item
-	 * useRubric | boolean | false for the base class, override in derived classes
+	 * useRubric | boolean | Can a rubric be defined for this part? false for the base class, override in derived classes
+	 * grading | AssignmentGrading | AssignmentGrading object that owns this grade part
 	 *
 	 * @param string $property Name of the property
 	 * @return mixed Set value
@@ -85,6 +94,7 @@ abstract class GradePart {
 	 *
 	 * @param string $property Name of the property
 	 * @param mixed $value Value to set
+	 * grading | AssignmentGrading | AssignmentGrading object that owns this grade part
 	 */
 	public function __set($property, $value) {
 		switch($property) {
@@ -214,34 +224,6 @@ abstract class GradePart {
 			}
 		}
 	}
-
-//
-//	/** The computed or entered grade for this category.
-//	 *
-//	 * Must be called after grading_form(), graded_form(), or post_form()
-//	 * since those functions set the grade after reading it from the
-//	 * database or getting it from POST data. */
-//	public function get_grade() {return $this->grade;}
-//
-//	/** Set the grade for this category.
-//	 * @param $grade GradeItem to set */
-//	protected function set_grade($grade) { $this->grade = $grade; }
-//
-//	/** Load the grade information from the database row */
-//	public function load_grade($row) {}
-//
-//	/** Clear the grade information */
-//	public function clear_grade() {
-//		$this->grade = null;
-//	}
-//
-//
-//	/** If true, this is an override grade */
-//	public function is_override() {return false;}
-//
-//	/** Optional auxiliary view associated with a grade */
-//	public function get_view_aux() {return null;}
-
 
 	private $grading = null;    // AssignmentGrading owner of this grade part
 	private   $name;        // Name of the grade item

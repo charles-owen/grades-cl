@@ -18,7 +18,7 @@ class GradeComment extends GradePart {
 
 	/**
 	 * Constructor
-	 * @param $name A category name for display
+	 * @param string $name A category name for display
 	 */
 	public function __construct($name) {
 		parent::__construct(0, null);
@@ -51,6 +51,8 @@ class GradeComment extends GradePart {
 	 * <b>Properties</b>
 	 * Property | Type | Description
 	 * -------- | ---- | -----------
+	 * grader| callable | Function function(Site $site, User $user) that creates grader HTML
+	 * present | callable | Function function(Site $site, User $user) that creates grade presentation HTML
 	 *
 	 * @param string $property Property name
 	 * @param mixed $value Value to set
