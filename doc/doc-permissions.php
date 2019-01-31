@@ -12,5 +12,6 @@
  *  tag | description | default
  * -----|-------------|--------
  *  grades-download | Download grades | Member::TA
+ *  grades-rubric-dumper | Dump all rubrics | Member::TA
  *
  */

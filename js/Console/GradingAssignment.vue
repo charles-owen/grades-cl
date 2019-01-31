@@ -2,7 +2,7 @@
   <div class="content cl-grades">
     <div class="full">
       <submissions-links :assignment="assignment"></submissions-links>
-      <membersfetcher>
+      <members-fetcher>
         <template slot-scope="fetcher">
           <table v-if="grades !== null" class="small">
             <tr class="vertical">
@@ -13,8 +13,8 @@
               <th v-if="grades !== null" class="small"><div>Grade</div></th>
             </tr>
             <tr v-for="user in fetcher.users" :class="user.role() !== 'T' ? 'ignore' : ''">
-              <td><router-link :to="link + user.member.id">{{user.userId}}</router-link></td>
-              <td><router-link :to="link + user.member.id">{{user.name}}</router-link></td>
+              <td><router-link :to="root + link + user.member.id">{{user.userId}}</router-link></td>
+              <td><router-link :to="root + link + user.member.id">{{user.name}}</router-link></td>
               <td class="role">{{user.roleName()}}</td>
               <td v-for="part in parts" class="right">{{partGrade(user, part)}}</td>
               <td v-if="grades !== null" class="right">{{grade(user)}}</td>
@@ -33,18 +33,16 @@
             </tr>
           </table>
         </template>
-      </membersfetcher>
+      </members-fetcher>
 
     </div>
   </div>
 </template>
 
 <script>
-	import MembersFetcherComponent from 'course-cl/js/Console/Members/MembersFetcherComponent.vue';
-  import SubmissionsLinksVue from 'course-cl/js/Console/SubmissionsLinks.vue';
-
+  const SubmissionsLinksVue = Site.SubmissionsLinksVue;
+  const MembersFetcherComponentVue = Site.MembersFetcherComponentVue;
   const ConsoleComponentBase = Site.ConsoleComponentBase;
-
 
   /**
    * The assignment grading page for the course.
@@ -56,7 +54,7 @@
 		props: ['assigntag'],
 		data: function () {
 			return {
-				link: Site.root + '/cl/console/grading/' + this.assigntag + '/',
+				link: '/cl/console/grading/' + this.assigntag + '/',
 				grades: null,
 				parts: [],
         fetched: false,
@@ -64,7 +62,7 @@
 			}
 		},
 		components: {
-			'membersfetcher': MembersFetcherComponent,
+			'membersFetcher': MembersFetcherComponentVue,
 		  'submissionsLinks': SubmissionsLinksVue
 		},
 		mounted() {
@@ -79,18 +77,18 @@
 
 			this.$parent.setTitle(': ' + this.assignment.shortname + ' Grading');
 
-			this.site.api.get('/api/grade/grades/' + this.assigntag, {})
+			this.$site.api.get('/api/grade/grades/' + this.assigntag, {})
 				.then((response) => {
 					if (!response.hasError()) {
 						this.grades = response.getData('grades').attributes;
 						this.parts = response.getData('grade-parts').attributes;
 					} else {
-						Site.toast(this, response);
+			      this.$site.toast(this, response);
 					}
 
 				})
 				.catch((error) => {
-					Site.toast(this, error);
+			    this.$site.toast(this, error);
 				});
 
 

@@ -1,7 +1,7 @@
 <template>
   <div class="content cl-grader">
     <div class="full">
-      <memberfetcher v-on:fetched="fetched" :id="memberid" :faillink="gradingLink">
+      <member-fetcher v-on:fetched="fetched" :id="memberid" :faillink="gradingLink">
         <template slot-scope="fetcher">
           <prev-next :user="fetcher.user"></prev-next>
           <div v-if="fetcher.user !== null">
@@ -39,7 +39,7 @@
 
           </div>
         </template>
-      </memberfetcher>
+      </member-fetcher>
 
     </div>
   </div>
@@ -74,7 +74,7 @@
 			}
 		},
 		components: {
-			memberfetcher: MemberFetcherComponentVue,
+			memberFetcher: MemberFetcherComponentVue,
 			prevNext: PrevNextMemberVue,
 			gradeHistory: GradeHistoryComponentVue,
 			submissions: SubmissionsAssignmentMemberComponentVue,

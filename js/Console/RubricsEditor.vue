@@ -31,52 +31,56 @@
 </template>
 
 <script>
-    import {Member} from 'course-cl/js/Members/Member';
-    import RubricEditorVue from './RubricEditor.vue';
+	import RubricEditorVue from './RubricEditor.vue';
 
-    const ConsoleComponentBase = Site.ConsoleComponentBase;
+	const ConsoleComponentBase = Site.ConsoleComponentBase;
+	const Member = Site.Member;
 
+	/**
+	 * Editor page for all rubrics for an assignment
+	 * /cl/console/rubric/:assigntag
+	 * @constructor RubricsEditorVue
+	 */
+	export default {
+		'extends': ConsoleComponentBase,
+		props: ['assigntag'],
+		data: function () {
+			return {
+				ta: Member.TA,
+				rubrics: []
+			}
+		},
+		components: {
+			rubricEditor: RubricEditorVue
+		},
+		created() {
+			this.$parent.setTitle(': Assignment Grading');
+			this.timer = null;
 
-    export default {
-        'extends': ConsoleComponentBase,
-        props: ['assigntag'],
-        data: function() {
-            return {
-                ta: Member.TA,
-                rubrics: []
-            }
-        },
-        components: {
-            rubricEditor: RubricEditorVue
-        },
-        created() {
-            this.$parent.setTitle(': Assignment Grading');
-            this.timer = null;
+			let user = this.$store.state.user.user;
+			let member = user.member;
 
-            let user = this.$store.state.user.user;
-            let member = user.member;
+			this.section = this.$store.getters['course/section'](member.semester, member.section);
+			this.assignment = this.section.getAssignment(this.assigntag);
 
-            this.section = this.$store.getters['course/section'](member.semester, member.section);
-            this.assignment = this.section.getAssignment(this.assigntag);
+			this.$parent.setTitle(': ' + this.assignment.shortname + ' Rubrics');
 
-            this.$parent.setTitle(': ' + this.assignment.shortname + ' Rubrics');
+			this.$site.api.get('/api/grade/rubrics/' + this.assignment.tag, {})
+				.then((response) => {
+					if (!response.hasError()) {
+						this.rubrics = response.getData('rubrics').attributes;
+						for (let rubric of this.rubrics) {
+							this.$set(rubric, 'show', rubric.rubric);
+						}
+					} else {
+						this.$site.toast(this, response);
+					}
 
-            Site.api.get('/api/grade/rubrics/' + this.assignment.tag, {})
-                .then((response) => {
-                    if (!response.hasError()) {
-                        this.rubrics = response.getData('rubrics').attributes;
-                        for(let rubric of this.rubrics) {
-                            this.$set(rubric, 'show', rubric.rubric);
-                        }
-                    } else {
-                        Site.toast(this, response);
-                    }
-
-                })
-                .catch((error) => {
-                    Site.toast(this, error);
-                });
-        }
-    }
+				})
+				.catch((error) => {
+					this.$site.toast(this, error);
+				});
+		}
+	}
 
 </script>

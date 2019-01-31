@@ -99,6 +99,11 @@ class GradesPlugin extends \CL\Site\Plugin {
 				return $view->whole();
 			});
 
+			$router->addRoute(['grades', 'rubric-dumper'], function(Site $site, Server $server, array $params, array $properties, $time) {
+				$view = new RubricsDownload($site, $server, $time);
+				return $view->whole();
+			});
+
 			$router->addRoute(['api', 'grade', '*'], function(Site $site, Server $server, array $params, array $properties, $time) {
 				$resource = new GradesApi();
 				return $resource->apiDispatch($site, $server, $params, $properties, $time);

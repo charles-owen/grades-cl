@@ -1,13 +1,7 @@
-<!--
-@file
-All student grades
-/cl/console/grades/all
--->
-
 <template>
   <div class="content">
     <div class="full">
-      <membersfetcher>
+      <members-fetcher>
         <template slot-scope="fetcher">
           <table class="small">
             <tr class="vertical">
@@ -22,8 +16,8 @@ All student grades
               </template>
             </tr>
             <tr v-for="user in fetcher.users" :class="user.role() !== 'T' ? 'ignore' : ''">
-              <td><router-link :to="link + user.member.id">{{user.userId}}</router-link></td>
-              <td><router-link :to="link + user.member.id">{{user.name}}</router-link></td>
+              <td><router-link :to="root + '/cl/console/grades/' + user.member.id">{{user.userId}}</router-link></td>
+              <td><router-link :to="root + '/cl/console/grades/' + user.member.id">{{user.name}}</router-link></td>
               <td>{{user.roleName()}}</td>
               <template v-for="category in section.assignments.categories">
                 <template v-for="assignment in category.assignments">
@@ -34,29 +28,31 @@ All student grades
             </tr>
           </table>
         </template>
-      </membersfetcher>
+      </members-fetcher>
 
     </div>
   </div>
 </template>
 
 <script>
-    import MembersFetcherComponent from 'course-cl/js/Console/Members/MembersFetcherComponent.vue';
-
+    const MembersFetcherComponentVue = Site.MembersFetcherComponentVue;
     const ConsoleComponentBase = Site.ConsoleComponentBase;
 
-
+    /**
+     * All grades for all members
+     * /cl/console/grades/all
+     * @constructor GradesAllVue
+     */
     export default {
         'extends': ConsoleComponentBase,
         data: function() {
             return {
-                link: Site.root + '/cl/console/grades/',
                 section: null,
                 grades: null,
             }
         },
         components: {
-            'membersfetcher': MembersFetcherComponent
+            'membersFetcher': MembersFetcherComponentVue
         },
         created() {
             let user = this.$store.state.user.user;
@@ -66,20 +62,17 @@ All student grades
         mounted() {
             this.$parent.setTitle(': Grades');
 
-
-
-
-            Site.api.get('/api/grade/all', {})
+            this.$site.api.get('/api/grade/all', {})
                 .then((response) => {
                     if (!response.hasError()) {
                         this.grades = response.getData('grades-all').attributes;
                     } else {
-                        Site.toast(this, response);
+	                    this.$site.toast(this, response);
                     }
 
                 })
                 .catch((error) => {
-                    Site.toast(this, error);
+	                this.$site.toast(this, error);
                 });
 
         },

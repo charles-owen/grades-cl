@@ -32,11 +32,15 @@
 </template>
 
 <script>
-    import PrevNextMemberVue from 'course-cl/js/Console/Members/PrevNextMember.vue';
-    import MemberFetcherComponent from 'course-cl/js/Console/Members/MemberFetcherComponent.vue';
-
+    const PrevNextMemberVue = Site.PrevNextMemberVue;
+    const MemberFetcherComponentVue = Site.MemberFetcherComponentVue;
     const ConsoleComponentBase = Site.ConsoleComponentBase;
 
+    /**
+     * Console grades presentation for a member
+     * /cl/console/grades/:num
+     * @constructor GradesMemberVue
+     */
     export default {
         extends: ConsoleComponentBase,
         props: ['memberid'],
@@ -49,7 +53,7 @@
             }
         },
         components: {
-            memberfetcher: MemberFetcherComponent,
+            memberfetcher: MemberFetcherComponentVue,
             prevNext: PrevNextMemberVue,
         },
         mounted() {
