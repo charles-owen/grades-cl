@@ -39,73 +39,87 @@
 </template>
 
 <script>
-
+	/**
+   * Handbook editor/viewing Vue component
+   *
+   * Use by both the student grade presentation page and the
+   * assignment grading page.
+   * @constructor HandbookVue
+   */
   export default {
-      props: {
-          item: {default: {}},
-          readonly: {default: false}
-      },
-      data: function() {
-          return {
-              metadata: {},
-              total: 0
-          }
-      },
-      created() {
-          this.metadata = {};
-          for(let category of this.item.handbook.categories) {
-              let catPoints = this.item.metadata[category.tag];
-              if(catPoints === undefined) {
-                  catPoints = 0;
-              }
+		props: {
+			item: {default: {}},
+			readonly: {default: false}
+		},
+		watch: {
+			item: function (value) {
+				this.take();
+			}
+		},
+		data: function () {
+			return {
+				metadata: {},
+				total: 0
+			}
+		},
+		mounted() {
+			this.take();
+		},
+		methods: {
+			take() {
+				this.metadata = {};
+				for (let category of this.item.handbook.categories) {
+					let catPoints = this.item.metadata[category.tag];
+					if (catPoints === undefined) {
+						catPoints = 0;
+					}
 
-              this.$set(this.metadata, category.tag, catPoints);
-          }
+					this.$set(this.metadata, category.tag, catPoints);
+				}
 
-          let catPoints = this.item.metadata['_manual'];
-          if(catPoints === undefined) {
-              catPoints = 0;
-          }
+				let catPoints = this.item.metadata['_manual'];
+				if (catPoints === undefined) {
+					catPoints = 0;
+				}
 
-          this.$set(this.metadata, '_manual', catPoints);
+				this.$set(this.metadata, '_manual', catPoints);
 
-          let manualText = this.item.metadata['_manual_text'];
-          if(manualText === undefined) {
-              manualText = '';
-          }
-          this.$set(this.metadata, '_manual_text', manualText);
+				let manualText = this.item.metadata['_manual_text'];
+				if (manualText === undefined) {
+					manualText = '';
+				}
+				this.$set(this.metadata, '_manual_text', manualText);
 
-          let comment = this.item.metadata['_comment'];
-          if(comment === undefined) {
-              comment = '';
-          }
-          this.$set(this.metadata, '_comment', comment);
+				let comment = this.item.metadata['_comment'];
+				if (comment === undefined) {
+					comment = '';
+				}
+				this.$set(this.metadata, '_comment', comment);
 
-          this.compute();
-      },
-      methods: {
-          compute() {
-              let total = -this.metadata['_manual'];
-              for(let category of this.item.handbook.categories) {
-                  total -= this.metadata[category.tag];
-              }
+				this.compute();
+			},
+			compute() {
+				let total = -this.metadata['_manual'];
+				for (let category of this.item.handbook.categories) {
+					total -= this.metadata[category.tag];
+				}
 
-              total += this.item.handbook.free;
-              if(total > 0) {
-                  total = 0;
-              }
-              total *= this.item.multiplier;
-              this.total = total;
+				total += this.item.handbook.free;
+				if (total > 0) {
+					total = 0;
+				}
+				total *= this.item.multiplier;
+				this.total = total;
 
-              this.$emit('handbook-data', {'metadata':this.metadata, 'total':this.total});
-          },
-          deduction(deduct) {
-              if(deduct === 0) {
-                  return '';
-              } else {
-                  return -deduct;
-              }
-          }
-      }
-  }
+				this.$emit('handbook-data', {'metadata': this.metadata, 'total': this.total});
+			},
+			deduction(deduct) {
+				if (deduct === 0) {
+					return '';
+				} else {
+					return -deduct;
+				}
+			}
+		}
+	}
 </script>

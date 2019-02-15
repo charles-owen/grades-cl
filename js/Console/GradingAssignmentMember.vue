@@ -47,7 +47,7 @@
 
 <script>
 	import GradeHistoryComponentVue from '../Util/GradeHistoryComponent.vue';
-	import HandbookComponentVue from '../Handbook/Handbook.vue';
+	import HandbookVue from '../Handbook/Handbook.vue';
 
 	const ConsoleComponentBase = Site.ConsoleComponentBase;
 	const PrevNextMemberVue = Site.PrevNextMemberVue;
@@ -78,7 +78,7 @@
 			prevNext: PrevNextMemberVue,
 			gradeHistory: GradeHistoryComponentVue,
 			submissions: SubmissionsAssignmentMemberComponentVue,
-			handbook: HandbookComponentVue
+			handbook: HandbookVue
 		},
 		mounted() {
 			this.setTitle(': Grading');

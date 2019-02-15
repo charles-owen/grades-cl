@@ -24,7 +24,7 @@
 
 <script>
 	import GradeHistoryComponent from '../Util/GradeHistoryComponent.vue';
-	import HandbookComponent from '../Handbook/Handbook.vue';
+	import HandbookVue from '../Handbook/Handbook.vue';
 
 	const UserVueBase = Site.UserVueBase;
 
@@ -39,7 +39,7 @@
 		props: ['json'],
 		components: {
 			gradeHistory: GradeHistoryComponent,
-			handbook: HandbookComponent
+			handbook: HandbookVue
 		},
 		mounted() {
 			this.$parent.setTitle(':  ' + this.json.assignment.shortName + ' Grade for ' + this.user.displayName());
@@ -47,7 +47,7 @@
 			const menu = [
 				{
 					name: 'Grades', click: () => {
-						window.location = Site.root = '/cl/grades';
+						window.location = this.$site.root + '/cl/grades';
 					}
 				}
 			];

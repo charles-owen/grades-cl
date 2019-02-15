@@ -1,7 +1,7 @@
 <template>
   <div class="content cl-grader">
     <div class="full">
-      <memberfetcher v-on:fetched="fetched" :id="memberid" :faillink="root + '/cl/console/grades/links'">
+      <member-fetcher v-on:fetched="fetched" :id="memberid" :faillink="root + '/cl/console/grades/links'">
         <template slot-scope="fetcher">
           <prev-next :user="fetcher.user"></prev-next>
           <div v-if="fetcher.user !== null && grade !== null">
@@ -25,70 +25,61 @@
             <p class="center">Computed Grade: {{grade.grade}} out of {{grade.available}} available points{{per}}</p>
           </div>
         </template>
-      </memberfetcher>
+      </member-fetcher>
 
     </div>
   </div>
 </template>
 
 <script>
-    const PrevNextMemberVue = Site.PrevNextMemberVue;
-    const MemberFetcherComponentVue = Site.MemberFetcherComponentVue;
-    const ConsoleComponentBase = Site.ConsoleComponentBase;
+	const PrevNextMemberVue = Site.PrevNextMemberVue;
+	const MemberFetcherComponentVue = Site.MemberFetcherComponentVue;
+	const ConsoleComponentBase = Site.ConsoleComponentBase;
 
-    /**
-     * Console grades presentation for a member
-     * /cl/console/grades/:num
-     * @constructor GradesMemberVue
-     */
-    export default {
-        extends: ConsoleComponentBase,
-        props: ['memberid'],
-        data: function() {
-            return {
-                course: this.$store.state.course.course,
-                section: null,
-                grade: null,
-                per: ''
-            }
-        },
-        components: {
-            memberfetcher: MemberFetcherComponentVue,
-            prevNext: PrevNextMemberVue,
-        },
-        mounted() {
-            this.setTitle(': Grade');
-//            this.addNav2('Submit', 2, () => {
-//                this.submit();
-//            });
-//
-//            this.addNav2('Submit and Exit', 3, () => {
-//                this.submit(true);
-//            });
-//
-//            this.addNav2Link('Exit', 4, '/cl/console/grading/' + this.assigntag);
-        },
-        methods: {
-            fetched(user) {
-                this.section = user.member.getSection(this.$store);
-                this.setTitle(': ' + user.name + ' Grades');
+	/**
+	 * Console grades presentation for a member
+	 * /cl/console/grades/:num
+	 * @constructor GradesMemberVue
+	 */
+	export default {
+		extends: ConsoleComponentBase,
+		props: ['memberid'],
+		data: function () {
+			return {
+				course: this.$store.state.course.course,
+				section: null,
+				grade: null,
+				per: ''
+			}
+		},
+		components: {
+			memberFetcher: MemberFetcherComponentVue,
+			prevNext: PrevNextMemberVue,
+		},
+		mounted() {
+			this.setTitle(': Grade');
+		},
+		methods: {
+			fetched(user) {
+				this.section = user.member.getSection(this.$store);
+				this.setTitle(': ' + user.name + ' Grades');
 
-                Site.api.get(`/api/grade/grade/${this.memberid}`, {})
-                    .then((response) => {
-                        if (!response.hasError()) {
-                            this.grade = response.getData('grade').attributes;
-                            if(this.grade.available > 0) {
-                                this.per = '(' + (this.grade.grade / this.grade.available * 100).toFixed(1) + '%)';
-                            }
-                        } else {
-                            Site.toast(this, response);
-                        }
+				this.$site.api.get(`/api/grade/grade/${this.memberid}`, {})
+					.then((response) => {
+						if (!response.hasError()) {
+							this.grade = response.getData('grade').attributes;
+							if (this.grade.available > 0) {
+								this.per = '(' + (this.grade.grade / this.grade.available * 100).toFixed(1) + '%)';
+							}
+						} else {
+							this.$site.toast(this, response);
+						}
 
-                    })
-                    .catch((error) => {
-                        Site.toast(this, error);
-                    });
-            }
-        }
-    }
+					})
+					.catch((error) => {
+						this.$site.toast(this, error);
+					});
+			}
+		}
+	}
 </script>
