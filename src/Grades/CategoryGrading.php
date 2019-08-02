@@ -105,7 +105,7 @@ class CategoryGrading {
 		foreach($assignments as $assignment) {
 			$assignment->load($user);
 			$p = $assignment->grading->points;
-			if($p == 0) {
+			if(+$p == 0) {
 				$zeros[] = $assignment;
 			}
 
@@ -124,7 +124,6 @@ class CategoryGrading {
 		 * Now collect up the grades for every assignment in the category
 		 */
 		$grades = [];
-		$indices = [];
 		foreach($assignments as $assignment) {
 			$grade = [];
 
@@ -132,7 +131,7 @@ class CategoryGrading {
 
 			$grade['name'] = $assignment->name;
 			$grade['tag'] = $assignment->tag;
-			$grade['points'] = round($grading->points, 1);
+			$grade['points'] = $grading->points;
 
 			$grade['closed'] = $assignment->after_due($user, $time);
 
