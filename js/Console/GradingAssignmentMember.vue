@@ -8,33 +8,38 @@
 
             <form ref="form" method="post" @submit.prevent="submit">
               <p :class="fetcher.user.role() === 'T' ? 'cl-role' : 'cl-role cl-role-staff'">
-              {{fetcher.user.roleName()}}: {{fetcher.user.name}} {{fetcher.user.role()}}
+                {{fetcher.user.roleName()}}: {{fetcher.user.name}} {{fetcher.user.role()}}
                 <em class="small">{{fetcher.user.userId}}</em>
                 <button class="cl-grader-button" @click.prevent="email(fetcher.user)">
-                  email {{fetcher.user.roleName().toLowerCase()}}</button>
-                <router-link class="cl-grader-button" tag="button" :to="root + '/cl/console/grades/' + fetcher.user.member.id">student grades</router-link>
+                  email {{fetcher.user.roleName().toLowerCase()}}
+                </button>
+                <router-link class="cl-grader-button" tag="button" :to="root + '/cl/console/grades/' + fetcher.user.member.id">student grades
+                </router-link>
               </p>
               <p class="cl-due" v-if="due !== null">Assignment due {{time(due)}} </p>
-            <div class="cl-grader-item" v-for="item in graders">
-              <h2>{{item.name}}</h2>
-              <template v-if="item.rubric !== undefined">
-                <div class="cl-toggle"><p class="cl-rubric-expand"><a>Expand for rubric</a></p>
-                  <div class="cl-rubricblock cl-clickable"><div v-html="item.rubric"></div></div>
-                </div>
-              </template>
-              <div v-if="item.handbook === undefined" v-html="item.html"></div>
-              <handbook v-else :item="item" v-on:handbook-data="handbookData"></handbook>
-              <grade-history :history="item.history"></grade-history>
-            </div>
-            <submissions :user="fetcher.user" :assigntag="assigntag"></submissions>
-            <component v-if="reviewing !== null" :is="reviewing" :assigntag="assigntag" :user="fetcher.user"></component>
-            <div class="grade">
-              <p v-if="grade !== null">Computed Grade: {{grade}}</p>
-              <template v-else>
-                <p>Grade Not Available</p>
-                <p class="center small notice">Grades are not available until all parts of the assignment have been graded.</p>
-              </template>
-            </div>
+              <div class="cl-grader-item" v-for="item in graders">
+                <h2>{{item.name}}<a v-if="item.teaming !== undefined" class="cl-extra-link" @click.prevent="teamDistribute(item)">Team Distribute</a></h2>
+                <template v-if="item.rubric !== undefined">
+                  <div class="cl-toggle"><p class="cl-rubric-expand"><a>Expand for rubric</a></p>
+                    <div class="cl-rubricblock cl-clickable">
+                      <div v-html="item.rubric"></div>
+                    </div>
+                  </div>
+                </template>
+                <div v-if="item.handbook === undefined" v-html="item.html"></div>
+                <handbook v-else :item="item" v-on:handbook-data="handbookData"></handbook>
+                <grade-history :history="item.history"></grade-history>
+              </div>
+              <submissions :user="fetcher.user" :assigntag="assigntag"></submissions>
+              <component v-if="reviewing !== null" :is="reviewing" :assigntag="assigntag" :user="fetcher.user"></component>
+              <div class="grade">
+                <p v-if="grade !== null">Computed Grade: {{grade}}</p>
+                <template v-else>
+                  <p>Grade Not Available</p>
+                  <p class="center small notice">Grades are not available until all parts of the assignment have been
+                    graded.</p>
+                </template>
+              </div>
             </form>
 
           </div>
@@ -116,7 +121,7 @@
 
 
 			},
-			submit(exit) {
+			submit(exit, callback) {
 				const form = this.$refs['form'];
 				const formData = new FormData(form);
 				if (this.handbookResult !== null) {
@@ -131,6 +136,10 @@
 							if (exit) {
 								this.$router.push(this.$site.root + '/cl/console/grading/' + this.assigntag);
 							}
+
+							if(callback !== undefined) {
+							  callback();
+                            }
 						} else {
 							this.$site.toast(this, response);
 						}
@@ -140,6 +149,33 @@
 						this.$site.toast(this, error);
 					});
 			},
+            /**
+             * Distribute grade item to all members of a team.
+             * @param item
+             */
+            teamDistribute(item) {
+			    this.submit(false, () => {
+			      const data = {
+                      teaming: item.teaming,
+                      gradeTag: item.tag
+                  };
+
+                  this.$site.api.post(`/api/team/distribute/${this.assigntag}/${this.memberid}`, data)
+                          .then((response) => {
+                            if (!response.hasError()) {
+
+
+                            } else {
+                              this.$site.toast(this, response);
+                            }
+
+                          })
+                          .catch((error) => {
+                            this.$site.toast(this, error);
+                          });
+                });
+
+            },
 			take(response) {
 				const grader = response.getData('grader');
 				this.due = grader.attributes.due !== undefined ? grader.attributes.due : null;

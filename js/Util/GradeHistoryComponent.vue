@@ -37,9 +37,10 @@
       methods: {
           display(history) {
               const grader = this.$store.getters['course/staff'](history.grader);
-              let str = this.$site.TimeFormatter.absoluteUNIX(history.time, 'short') +
+              const graderName = grader !== null ? grader.displayName() : "Invalid";
+              const str = this.$site.TimeFormatter.absoluteUNIX(history.time, 'short') +
                       ' by ' +
-                      grader.displayName();
+                      graderName;
 
               return str;
           }

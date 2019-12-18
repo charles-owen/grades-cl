@@ -47,6 +47,13 @@ div.cl-grader {
     color: black;
   }
 
+  a.cl-extra-link {
+    display: block;
+    float: right;
+    font-size: 0.5em;
+    padding-top: 1em;
+  }
+
   tr.cl-category {
     td {
       text-align: right;

@@ -67,6 +67,13 @@ class GradesApi extends \CL\Users\Api\Resource {
 			// /api/grade/tables
 			case 'tables':
 				return $this->tables($site, $server, new GradesTables($site->db));
+
+			// /api/grade/bulk/upload/:assigntag
+            case 'bulk':
+                $api = new GradesApiBulk();
+                $params2 = $params;
+                array_shift($params2);
+                return $api->dispatch($site, $server, $params2, $properties, $time);
 		}
 
 		throw new APIException("Invalid API Path", APIException::INVALID_API_PATH);

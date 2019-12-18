@@ -20,13 +20,13 @@ class GradeManual extends GradePart {
 
 	/**
 	 * Constructor
-	 * \param $points The maximum possible points for this category
-	 * \param $tag The category tag
-	 * \param $name A category name for display
+	 * @param int $points The maximum possible points for this category
+	 * @param string $tag The category tag
+	 * @param string $name A category name for display
+     * @param string $teaming Optional teaming this grade part is associated with
 	 */
-	public function __construct($points, $tag, $name) {
-		parent::__construct($points, $tag);
-		$this->__set("name", $name);
+	public function __construct($points, $tag, $name, $teaming=null) {
+		parent::__construct($points, $tag, $name, $teaming);
 	}
 
 	/**

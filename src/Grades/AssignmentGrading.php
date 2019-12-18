@@ -108,10 +108,11 @@ class AssignmentGrading {
 	 * @param int $points Number of points allocated to this category
 	 * @param string $tag Tag associated with this category
 	 * @param string $name Name of the grade
+     * @param string $teaming Optional teaming this grade part is associated with
 	 * @return GradePart object
 	 */
-	public function add_manual($points, $tag, $name) {
-		return $this->add(new GradeManual($points, $tag, $name));
+	public function add_manual($points, $tag, $name, $teaming=null) {
+		return $this->add(new GradeManual($points, $tag, $name, $teaming));
 	}
 
 
@@ -128,11 +129,12 @@ class AssignmentGrading {
 	/**
 	 * Add course Handbook grading to an assignment
 	 * @param int $multiplier Amount the deductions are multiplied by
+     * @param string $teaming Optional teaming this grade part is associated with
 	 * @return GradePart object
 	 */
-	public function add_handbook($multiplier) {
+	public function add_handbook($multiplier, $teaming=null) {
 		$handbook = $this->assignment->section->handbook;
-		return $this->add(new GradeHandbook($multiplier, $handbook));
+		return $this->add(new GradeHandbook($multiplier, $handbook, $teaming));
 	}
 
 	/**

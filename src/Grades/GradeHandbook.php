@@ -19,10 +19,10 @@ class GradeHandbook extends GradePart {
 	 * Constructor
 	 * @param int $multiplier Handbook deduction multiplier
 	 * @param Handbook $handbook The Handbook object that defines the grading.
-	 */
-	public function __construct($multiplier, Handbook $handbook) {
-		parent::__construct(0, '_handbook');
-		$this->__set("name", $handbook->title);
+     * @param string $teaming Optional teaming this grade part is associated with
+     */
+	public function __construct($multiplier, Handbook $handbook, $teaming=null) {
+		parent::__construct(0, '_handbook', $handbook->title, $teaming);
 
 		$this->multiplier = $multiplier;
 		$this->handbook = $handbook;

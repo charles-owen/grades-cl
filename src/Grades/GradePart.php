@@ -23,6 +23,7 @@ use CL\Users\User;
  * @property string tag
  * @property boolean useRubric
  * @property AssignmentGrading grading
+ * @property string teaming
  * @endcond
  */
 abstract class GradePart {
@@ -34,11 +35,13 @@ abstract class GradePart {
 	 * @param int $points Number of points allocated to this grade.
 	 * @param string $tag Tag that identifies this grade within the category.
 	 * @param string $name Name of the grade item.
+     * @param string $teaming Optional teaming this grade part is associated with
 	 */
-	public function __construct($points, $tag, $name = null) {
+	public function __construct($points, $tag, $name = null, $teaming = null) {
 		$this->points = $points;
 		$this->tag = $tag;
 		$this->name = $name;
+		$this->teaming = $teaming;
 	}
 
 
@@ -73,6 +76,9 @@ abstract class GradePart {
 
 			case 'grading':
 				return $this->grading;
+
+            case 'teaming':
+                return $this->teaming;
 
 			default:
 				$trace = debug_backtrace();
@@ -157,10 +163,14 @@ abstract class GradePart {
 			'html'=>''
 		];
 
-			$grade = $grades[$this->tag];
-			if($grade !== null) {
-				$data['history'] = $grade->getHistory();
-			}
+		if($this->teaming !== null) {
+		    $data['teaming'] = $this->teaming;
+        }
+
+        $grade = $grades[$this->tag];
+        if($grade !== null) {
+            $data['history'] = $grade->getHistory();
+        }
 
 		return $data;
 	}
@@ -178,6 +188,10 @@ abstract class GradePart {
 			'name'=>$this->name,
 			'points'=>$this->points
 		];
+
+        if($this->teaming !== null) {
+            $data['teaming'] = $this->teaming;
+        }
 
 		$grade = $grades[$this->tag];
 		if($grade !== null) {
@@ -226,7 +240,8 @@ abstract class GradePart {
 	}
 
 	private $grading = null;    // AssignmentGrading owner of this grade part
-	private   $name;        // Name of the grade item
-	protected $points;	    ///< int Number of points for this part of the grade
-	protected $tag;		    ///< The grade item tag
+	private   $name;            // Name of the grade item
+	protected $points;	        // int Number of points for this part of the grade
+	protected $tag;		        // The grade item tag
+    private $teaming;           // Any teaming associated with this grade part
 }
