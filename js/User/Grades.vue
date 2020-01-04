@@ -14,7 +14,7 @@
 
             <tr class="cl-assignment" v-for="assignment in category.assignments" :key="assignment.tag">
               <td><a :href="root + '/cl/grade/' + assignment.tag">{{assignment.name}}</a></td>
-              <td>{{assignment.points}}%</td><td>{{assignment.grade}}</td><td colspan="2">&nbsp;</td>
+              <td>{{Math.round(assignment.points * 10) / 10}}%</td><td>{{assignment.grade}}</td><td colspan="2">&nbsp;</td>
             </tr>
           </template>
 
