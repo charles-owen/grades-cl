@@ -75,7 +75,7 @@ div.cl-grader {
     }
   }
 
-  div.grader {
+  div.cl-grade, div.grader {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -95,7 +95,7 @@ div.cl-grader {
 
       div.comment {
         @extend %shadow;
-        white-space: pre;
+        white-space: pre-wrap;
         background: #f0f0f0;
         font-style: normal;
         border: 1px solid #a9a9a9;
@@ -106,7 +106,7 @@ div.cl-grader {
     }
 
     div.points {
-      flex: 0 1 auto;
+      flex: 0 0 auto;
       width: 5em;
       text-align: center;
       padding: 45px 5px 0 0;

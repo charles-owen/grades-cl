@@ -78,11 +78,14 @@ class GradesApiBulk extends \CL\Users\Api\Resource {
 			throw new APIException("Section is invalid");
 		}
 
-		$rows = str_getcsv($file, "\n");
+		$rows = preg_split("/\r\n|\n|\r/", $file);
 		$csv = [];
 		$header = str_getcsv($rows[0]);
 		for($i=1;  $i<count($rows); $i++) {
-		    $csv[] = array_combine($header, str_getcsv($rows[$i]));
+		    $data = str_getcsv($rows[$i]);
+		    if(count($header) == count($data)) {
+                $csv[] = array_combine($header, $data);
+            }
         }
 
 		$members = new Members($site->db);

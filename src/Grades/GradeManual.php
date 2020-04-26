@@ -85,7 +85,7 @@ class GradeManual extends GradePart {
 		$comment = htmlentities($grade->comment !== null ? $grade->comment : '');
 
 		$html = <<<HTML
-<div class="grader">
+<div class="cl-grade">
   <div class="comment">
   	<label>Comment
 	  <textarea rows="6" class="comment" name="$this->tag-comment">$comment</textarea>
@@ -122,7 +122,7 @@ HTML;
 		$comment = htmlentities($grade->comment !== null ? $grade->comment : '');
 
 		$html = <<<HTML
-<div class="grader">
+<div class="cl-grade">
   <div class="comment">
 	<div class="label">Comment</div>
     <div class="comment">$comment</div>
