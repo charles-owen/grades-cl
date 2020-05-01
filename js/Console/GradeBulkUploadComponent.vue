@@ -19,10 +19,6 @@
 </template>
 
 <script>
-  import Dialog from 'dialog-cl';
-
-  let Vue = Site.Vue;
-
   import GradesUploadColumnChooserComponent from './GradesUploadColumnChooser.vue';
 
   export default {
@@ -32,10 +28,10 @@
         bulkFiles: null
       }
     },
-    mounted() {
-    },
     methods: {
       bulkUpload: function () {
+        const site = this.$site;
+
         if (this.bulkFiles === null || this.bulkFiles.length < 1) {
           return;
         }
@@ -46,11 +42,14 @@
         // Closure to capture the file information.
         reader.onload = (e) => {
           const member = this.$store.state.user.user.member;
+
+          // Data we will send to the server
           let data = {
             file: e.target.result,
             semester: member.semester,
             section: member.section,
             mapping: '',
+            commentMapping: '',
             idcolumn: ''
           }
 
@@ -60,8 +59,8 @@
           const re = /^.*$/m;
           const match = e.target.result.match(re);
           if (match === null) {
-            new Dialog.MessageBox('Invalid File', 'File does not contain grade data.',
-                    Dialog.MessageBox.OK, () => {
+            new site.Dialog.MessageBox('Invalid File', 'File does not contain grade data.',
+                    site.Dialog.MessageBox.OK, () => {
                     });
             return;
           }
@@ -69,9 +68,10 @@
           const columns = match[0].split(',');
           const parts = this.parts;
           let mapping = {};
+          let commentMapping = {};
           let idColumn = {};
 
-          new Dialog({
+          new site.Dialog({
             title: 'Column Selection',
             content: '<div id="cl-column-chooser"></div>',
             addClass: 'cl-column-chooser-dlg',
@@ -91,20 +91,21 @@
                   }
 
                   if (!any) {
-                    Site.toast(this, "No columns selected to upload");
+                    site.toast(this, "No columns selected to upload");
                     return;
                   }
 
                   data.mapping = JSON.stringify(mapping);
+                  data.commentMapping = JSON.stringify(commentMapping);
                   data.idcolumn = idColumn.id;
 
-                  Site.api.post('/api/grade/bulk/upload/' + this.assigntag, data)
+                  site.api.post('/api/grade/bulk/upload/' + this.assigntag, data)
                           .then((response) => {
                             if (!response.hasError()) {
 
                               let results = response.getData('results');
 
-                              Site.toast(this, '' + results.attributes.grades + " grades successfully uploaded for " +
+                              site.toast(this, '' + results.attributes.grades + " grades successfully uploaded for " +
                                 results.attributes.users + ' users');
                               setTimeout(() => {
                                 window.history.go();
@@ -112,13 +113,13 @@
 
                             } else {
                               console.log(response);
-                              Site.toast(this, response);
+                              site.toast(this, response);
                             }
 
                           })
                           .catch((error) => {
                             console.log(error);
-                            Site.toast(this, error);
+                            site.toast(this, error);
                           });
 
                 }
@@ -137,13 +138,14 @@
           });
 
           // Create a Vue inside the dialog box
-          new Vue({
+          new site.Vue({
             el: '#cl-column-chooser',
             data: function () {
               return {
                 parts: parts,
                 columns: columns,
                 mapping: mapping,
+                commentMapping: commentMapping,
                 idColumn: idColumn
 
               }
@@ -157,11 +159,11 @@
         };
 
         reader.onerror = function (e) {
-          Site.toast(this, "Error reading file");
+          site.toast(this, "Error reading file");
         };
 
         reader.onabort = function (e) {
-          Site.toast(this, "File read aborted");
+          site.toast(this, "File read aborted");
         };
 
         // Read in the file

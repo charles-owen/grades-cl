@@ -15,8 +15,8 @@ use CL\Course\Members;
 use CL\Course\Member;
 
 /**
- * API resource for reading users in bulk from a file
- * Path: cl/course/members/bulk
+ * API resource for reading grades in bulk from a file
+ * Path: /api/grade/bulk/upload/:assigntag
  */
 class GradesApiBulk extends \CL\Users\Api\Resource {
 	/**
@@ -59,13 +59,14 @@ class GradesApiBulk extends \CL\Users\Api\Resource {
 		$this->atLeast($user, Member::TA);
 
 		$post = $server->post;
-		$this->ensure($post, ['file', 'semester', 'section', 'mapping']);
+		$this->ensure($post, ['file', 'semester', 'section', 'mapping', 'commentMapping']);
 
 		$file = $post['file'];
 		$semesterId = trim(strip_tags($post['semester']));
 		$sectionId = trim(strip_tags($post['section']));
 		$idColumn = trim(strip_tags($post['idcolumn']));
-		$mapping = json_decode($post['mapping'], true);
+        $mapping = json_decode($post['mapping'], true);
+        $commentMapping = json_decode($post['commentMapping'], true);
         $assignTag = $params[1];
 
 
@@ -124,7 +125,14 @@ class GradesApiBulk extends \CL\Users\Api\Resource {
 
                 $points = intval(round($row[$column]));
                 $grade = $grades->get($recipient, $assignTag, $gradeTag);
-                $grade->set($user, $points, '', $time);
+
+                $comment = '';
+                if(isset($commentMapping[$gradeTag]) && isset($row[$commentMapping[$gradeTag]])) {
+                    $comment = $row[$commentMapping[$gradeTag]];
+                    $comment = str_replace("\\n", "\n", $comment);
+                }
+
+                $grade->set($user, $points, $comment, $time);
                 $grades->post($recipient, $grade);
 
                 $gradesCnt++;
