@@ -77,33 +77,37 @@ class GradeManual extends GradePart {
 	public function createGrader(Site $site, User $user, array $grades) {
 		$data = parent::createGrader($site, $user, $grades);
 
-		$memberId = $user->member->id;
-
 		$grade = $grades[$this->tag];
 		$points = $grade->points !== null ? $grade->points : '';
 		$data['status'] = $points;
 		$comment = htmlentities($grade->comment !== null ? $grade->comment : '');
 
-		$html = <<<HTML
-<div class="cl-grade">
-  <div class="comment">
-  	<label>Comment
-	  <textarea rows="6" class="comment" name="$this->tag-comment">$comment</textarea>
-	</label>
-  </div>
-  <div class="points">
-    <label>Points
-    <input class="points" value="$points" type="number" id="$this->tag-points" name="$this->tag-points">
-    </label>
-  </div>
-  <div class="points">
-    <div class="label">Available</div>
-    <div class="value"><a class="available-clicker" data-id="$this->tag-points" title="Click to fill in points">$this->points</a></div>
-  </div>
-</div>
-HTML;
+		$data['manual'] = [
+            'points'=>$points,
+            'comment'=>$comment,
+            'available'=>$this->points
+        ];
 
-		$data['html'] = $html;
+//		$html = <<<HTML
+//<div class="cl-grade">
+//  <div class="comment">
+//  	<label>Comment
+//	  <textarea rows="6" class="comment" name="$this->tag-comment">$comment</textarea>
+//	</label>
+//  </div>
+//  <div class="points">
+//    <label>Points
+//    <input class="points" value="$points" type="number" id="$this->tag-points" name="$this->tag-points">
+//    </label>
+//  </div>
+//  <div class="points">
+//    <div class="label">Available</div>
+//    <div class="value"><a class="cl-available-clicker" data-id="$this->tag-points" title="Click to fill in points">$this->points</a></div>
+//  </div>
+//</div>
+//HTML;
+
+		// $data['html'] = $html;
 		return $data;
 	}
 

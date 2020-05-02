@@ -7,6 +7,27 @@ div.cl-grades {
 }
 
 div.cl-grader {
+  form {
+    position: relative;
+  }
+
+  div.cl-grader-item {
+    position: relative;
+    background: white;
+    padding-bottom: 0.25em;
+
+    h2 {
+      margin-top: -0.25em;
+    }
+  }
+
+  div.cl-grader-item-locked {
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    top: 50px;
+    z-index: 100;
+    background: #f8fff8;
+  }
 
   a.link-button {
     display: inline-block;
@@ -82,6 +103,12 @@ div.cl-grader {
 
     label, div.label {
       font-style: italic;
+
+      a {
+        font-size: 0.85em;
+        text-decoration: none;
+        padding-left: 1em;
+      }
     }
 
     div.comment {
@@ -127,14 +154,11 @@ div.cl-grader {
 
     div.value {
       padding: 2px 1px;
+      a {
+        text-decoration: none;
+        color: black;
+      }
     }
-
-    a.available-clicker {
-      text-decoration: none;
-      color: black;
-
-    }
-
   }
 
   table.cl-handbook {

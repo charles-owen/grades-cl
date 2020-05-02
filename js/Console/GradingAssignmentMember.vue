@@ -17,8 +17,11 @@
                 </router-link>
               </p>
               <p class="cl-due" v-if="due !== null">Assignment due {{time(due)}} </p>
-              <div class="cl-grader-item" v-for="item in graders">
-                <h2>{{item.name}}<a v-if="item.teaming !== undefined" class="cl-extra-link" @click.prevent="teamDistribute(item)">Team Distribute</a></h2>
+
+              <!-- Grading items -->
+              <div v-for="item in graders" :class="'cl-grader-item' + (item.locked ? ' cl-grader-item-locked' : '')"  :data-tag="item.tag">
+                <h2><span class="cl-grader-item-lock"><a @click.prevent="lock(item)" title="Lock/Unlock"><img :src="root + (item.locked ? '/cl/img/lock-on.png' : '/cl/img/lock-off.png')" alt="Unlocked"></a></span>
+                {{item.name}}<a v-if="item.teaming !== undefined" class="cl-extra-link" @click.prevent="teamDistribute(item)">Team Distribute</a></h2>
                 <template v-if="item.rubric !== undefined">
                   <div class="cl-toggle"><p class="cl-rubric-expand"><a>Expand for rubric</a></p>
                     <div class="cl-rubricblock cl-clickable">
@@ -26,10 +29,13 @@
                     </div>
                   </div>
                 </template>
-                <div v-if="item.handbook === undefined" v-html="item.html"></div>
-                <handbook v-else :item="item" v-on:handbook-data="handbookData"></handbook>
+                <grade-manual v-if="item.manual !== undefined" :item="item"></grade-manual>
+                <div v-if="item.html !== undefined" v-html="item.html"></div>
+                <handbook v-if="item.handbook !== undefined" :item="item" v-on:handbook-data="handbookData"></handbook>
                 <grade-history :history="item.history"></grade-history>
               </div>
+
+              <!-- Submissions -->
               <submissions :user="fetcher.user" :assigntag="assigntag"></submissions>
               <component v-if="reviewing !== null" :is="reviewing" :assigntag="assigntag" :user="fetcher.user"></component>
               <div class="grade">
@@ -53,6 +59,7 @@
 <script>
 	import GradeHistoryComponentVue from '../Util/GradeHistoryComponent.vue';
 	import HandbookVue from '../Handbook/Handbook.vue';
+	import GradeManualVue from './GradeManual.vue';
 
 	const ConsoleComponentBase = Site.ConsoleComponentBase;
 	const PrevNextMemberVue = Site.PrevNextMemberVue;
@@ -83,7 +90,8 @@
 			prevNext: PrevNextMemberVue,
 			gradeHistory: GradeHistoryComponentVue,
 			submissions: SubmissionsAssignmentMemberComponentVue,
-			handbook: HandbookVue
+			handbook: HandbookVue,
+          gradeManual: GradeManualVue
 		},
 		mounted() {
 			this.setTitle(': Grading');
@@ -177,29 +185,48 @@
 
             },
 			take(response) {
+                // Is there an existing locked grader?
+                let locked = null;
+                for(let i=0; i<this.graders.length; i++) {
+                  if(this.graders[i].locked) {
+                    locked = i;
+                    break;
+                  }
+                }
+
 				const grader = response.getData('grader');
 				this.due = grader.attributes.due !== undefined ? grader.attributes.due : null;
+
+                for(const grader of grader.attributes.graders) {
+                  grader.locked = false;
+                }
+
 				this.graders = grader.attributes.graders;
 				this.grade = grader.attributes.grade;
 
+				if(locked !== null) {
+				    this.graders[locked].locked = true;
+                }
+
 				this.$forceUpdate();
 				this.$nextTick(() => {
-					this.installAvailableClickers();
 					this.installRubricClickers();
 					this.$site.message('cl-grades-grader-installed');
 				});
 
 
 			},
-			/// Install clicker for available that will autofill the points
-			installAvailableClickers() {
-				let clickables = document.querySelectorAll('div.cl-grader div.grader a.available-clicker');
-				for (const element of clickables) {
-					element.addEventListener('click', () => {
-						document.getElementById(element.dataset.id).value = element.innerText;
-					});
-				}
-			},
+            lock(item) {
+              if(item.locked) {
+                item.locked = false;
+              } else {
+                for(const grader of this.graders) {
+                  grader.locked = false;
+                }
+
+                item.locked = true;
+              }
+            },
 			/// Install clickers for Rubric items that will autofill them.
 			installRubricClickers() {
 				const selectors = ['div.cl-clickable li.item', 'div.cl-clickable ul.items li', 'div.cl-clickable p.item'];
@@ -232,6 +259,20 @@
 				if (element === null) {
 					return;
 				}
+
+				// Find the item this does with
+				const tag = element.dataset.tag;
+                for(let item of this.graders) {
+                  if(item.tag === tag) {
+                    if(item.manual !== undefined) {
+                      if(item.manual.comment.length > 0 && item.manual.comment.match(/\n$/) === null) {
+                        item.manual.comment += "\n";
+                      }
+                      item.manual.comment += content;
+                    }
+                    break;
+                  }
+                }
 
 				// Find a textarea inside this
 				for (let textarea of element.querySelectorAll('textarea')) {
