@@ -25,6 +25,8 @@ class GradesView extends View {
 	public function __construct(Site $site, Server $server, $time) {
 		parent::__construct($site, ['at-least'=>Member::STUDENT]);
 
+        $this->decorApply('grades.decor.php');
+
 		//
 		// Loop over the categories, asking each for a grade
 		//
@@ -41,11 +43,14 @@ class GradesView extends View {
 		$data = [
 			'categories' => $grades,
 			'grade' => round($total, 1),
-			'available'=>round($available, 1)
+			'available'=>round($available, 1),
+            'dispute'=>$this->section->assignments->gradeDispute,
+            'before'=>$this->before,
+            'after'=>$this->after
 		];
 
 		$this->setTitle('Grades for ' . $this->user->displayName);
 		$this->addJS('grades');
 		$this->addCLS('cl-grades', json_encode($data));
-	}
+     }
 }

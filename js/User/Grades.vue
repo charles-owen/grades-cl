@@ -2,6 +2,9 @@
   <div class="content cl-grader">
     <div class="full">
       <div v-if="grade !== null">
+        <p><span v-html="json.before"></span></p>
+        <p v-if="json.dispute !== null" class="center">Please direct all grading issues to <span v-html="json.dispute"></span></p>
+
         <table>
           <tr>
             <th>Assignment</th><th>&nbsp;</th><th>Grade</th><th>&nbsp;</th><th>Grade</th>
@@ -12,7 +15,7 @@
               <td colspan="3">{{category.name}}</td><td>{{category.points}}%</td><td>{{category.grade}}</td>
             </tr>
 
-            <tr class="cl-assignment" v-for="assignment in category.assignments" :key="assignment.tag">
+            <tr class="cl-assignment" v-for="assignment in category.assignments" :key="assignment.tag" v-if="assignment.points > 0">
               <td><a :href="root + '/cl/grade/' + assignment.tag">{{assignment.name}}</a></td>
               <td>{{Math.round(assignment.points * 10) / 10}}%</td><td>{{assignment.grade}}</td><td colspan="2">&nbsp;</td>
             </tr>
@@ -21,6 +24,8 @@
         </table>
         <p class="center">Click on each assignment for more grading detail</p>
         <p class="center">Computed Grade: {{grade.grade}} out of {{grade.available}} available points{{per}}</p>
+        <p><span v-html="json.after"></span></p>
+
       </div>
 
     </div>
