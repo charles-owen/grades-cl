@@ -229,7 +229,7 @@ HTML;
 //
 //
 //	/** Handle POST from the part of a form for manual grade entry
-//	 * \param $user User to post the grade for */
+//	 * @param $user User to post the grade for */
 //	public function post_form(\User $user) {
 //		// Get the data
 //		$points = trim($_REQUEST["$this->tag-points"]);
