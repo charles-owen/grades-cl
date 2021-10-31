@@ -288,9 +288,13 @@ class GradesApi extends \CL\Users\Api\Resource {
 		$grading = $assignment->grading;
 		$parts = [];
 		foreach($grading->parts as $part) {
-			$parts[] = ['tag'=>$part->tag,
-				'name'=>$part->name,
-				'points'=>$part->points];
+            $gradeParts = ['tag'=>$part->tag,
+                'name'=>$part->name,
+                'points'=>$part->points];
+            if($part->teaming !== null) {
+                $gradeParts['teaming'] = $part->teaming;
+            }
+			$parts[] = $gradeParts;
 		}
 
 
