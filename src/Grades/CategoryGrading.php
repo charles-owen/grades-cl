@@ -102,28 +102,27 @@ class CategoryGrading {
 		 * First, we need to ensure we have a percentage
 		 * assigned to every assignment. We total what we
 		 * are given and divide the remainder among all
-		 * assignments that have a zero percentage
+		 * assignments that have a null percentage
 		 */
 		$assignments = $this->category->assignments;
 		$total = 0;
-		$zeros = array();
+		$nulls = [];
 		foreach($assignments as $assignment) {
 			$assignment->load($user);
 			$p = $assignment->grading->points;
-			if(+$p == 0) {
-				$zeros[] = $assignment;
-			}
-
-			$total += $p;
+			if($p === null) {
+				$nulls[] = $assignment;
+			} else {
+                $total += $p;
+            }
 		}
 
-		if(count($zeros) > 0 && $total < 100) {
-			$p1 = (100.0 - $total) / count($zeros);
-			foreach($zeros as $zero) {
+		if(count($nulls) > 0 && $total < 100) {
+			$p1 = (100.0 - $total) / count($nulls);
+			foreach($nulls as $zero) {
 				$zero->grading->points = $p1;
 			}
 		}
-
 
 		/*
 		 * Now collect up the grades for every assignment in the category

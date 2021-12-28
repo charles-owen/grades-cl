@@ -284,8 +284,8 @@ class GradeHandbook extends GradePart {
 //		return $html;
 //	}
 //
-//	/** \brief Handle POST from the part of a form for manual grade entry
-//	 * \param $user User we are posting for */
+//	/** Handle POST from the part of a form for manual grade entry
+//	 * @param $user User we are posting for */
 //	public function post_form(\User $user) {
 //		$points = 0;
 //

@@ -49,8 +49,7 @@
             semester: member.semester,
             section: member.section,
             mapping: '',
-            commentMapping: '',
-            idcolumn: ''
+            commentMapping: ''
           }
 
           //
@@ -69,7 +68,8 @@
           const parts = this.parts;
           let mapping = {};
           let commentMapping = {};
-          let idColumn = {};
+          let idColumn = {active: true};
+          let teamColumn = {active: false}
 
           new site.Dialog({
             title: 'Column Selection',
@@ -97,7 +97,12 @@
 
                   data.mapping = JSON.stringify(mapping);
                   data.commentMapping = JSON.stringify(commentMapping);
-                  data.idcolumn = idColumn.id;
+                  if(idColumn.active) {
+                    data.idcolumn = idColumn.id;
+                  } else if(teamColumn.active) {
+                    data.teamcolumn = teamColumn.id
+                    data.teaming = teamColumn.teaming
+                  }
 
                   site.api.post('/api/grade/bulk/upload/' + this.assigntag, data)
                           .then((response) => {
@@ -146,8 +151,8 @@
                 columns: columns,
                 mapping: mapping,
                 commentMapping: commentMapping,
-                idColumn: idColumn
-
+                idColumn: idColumn,
+                teamColumn: teamColumn
               }
             },
             template: `<chooser :parts="parts" :columns="columns"></chooser>`,

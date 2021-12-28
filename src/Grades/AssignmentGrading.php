@@ -377,6 +377,6 @@ class AssignmentGrading {
 
 	private $gradeParts = array();	// The GradePart objects for the assignment
 
-	private $points = 0;            // Optional points for this assignment, 0=divide equally
+	private $points = null;            // Optional points for this assignment, null=divide equally
 	private $extensions = [];       // Extensions to this object
 }

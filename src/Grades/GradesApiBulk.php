@@ -64,11 +64,16 @@ class GradesApiBulk extends \CL\Users\Api\Resource {
 		$file = $post['file'];
 		$semesterId = trim(strip_tags($post['semester']));
 		$sectionId = trim(strip_tags($post['section']));
-		$idColumn = trim(strip_tags($post['idcolumn']));
         $mapping = json_decode($post['mapping'], true);
         $commentMapping = json_decode($post['commentMapping'], true);
         $assignTag = $params[1];
 
+        $idColumn = isset($post['idcolumn']) ? trim(strip_tags($post['idcolumn'])) : null;
+        $teamColumn = isset($post['teamcolumn']) ? trim(strip_tags($post['teamcolumn'])) : null;
+        $teamingTag = isset($post['teaming']) ? trim(strip_tags($post['teaming'])) : null;
+        if($idColumn === null && ($teamColumn === null || $teamingTag === null)) {
+            throw new APIException("Upload must have a member or team column and teaming", APIException::INVALID_API_USAGE);
+        }
 
         //
 		// Does the requested section exist?
@@ -94,49 +99,84 @@ class GradesApiBulk extends \CL\Users\Api\Resource {
         $gradesCnt = 0;
         $usersCnt = 0;
 
+        $teaming = null;
+        $teamMembers = null;
+        $teams = [];
+        if($teamColumn !== null) {
+            $teamings = new \CL\Team\Teamings($site->db);
+            $teamMembers = new \CL\Team\TeamMembers($site->db);
+            $teamsTable = new \CL\Team\Teams($site->db);
+
+            $teaming = $teamings->getByTag($semesterId, $sectionId, $teamingTag);
+            if($teaming === null) {
+                throw new APIException("Teaming " . $teamingTag . " does not exist", APIException::INVALID_API_USAGE);
+            }
+
+            $teams = $teamsTable->getTeams($teaming->id);
+        }
+
+
         foreach($csv as $row) {
-            // What is the ID from the data?
-            if(!isset($row[$idColumn])) {
-                continue;
+            $recipients = [];
+
+            if($idColumn !== null) {
+                // What is the ID from the data?
+                if(!isset($row[$idColumn])) {
+                    continue;
+                }
+
+                // Find the member
+                $id = trim(strip_tags($row[$idColumn]));
+                if(strpos($id, '@')) {
+                    // This is an email address
+                    $recipients = $members->query(['email' => $id, 'semester'=>$semesterId, 'sectionId'=>$sectionId]);
+                } else {
+                    // Assume this is an ID
+                    $recipients = $members->query(['userUser' => $id, 'semester'=>$semesterId, 'sectionId'=>$sectionId]);
+                }
+            } else if($teamColumn !== null) {
+                // Find the team
+                $teamName = trim(strip_tags($row[$teamColumn]));
+                $recipients = [];
+
+                foreach($teams as $team) {
+                    if($team->name === $teamName) {
+                        // Get the members
+                        $teamMembers->getTeamMembers($team);
+                        $recipients = $team->members;
+                    }
+                }
             }
 
-            // Find the member
-            $id = trim(strip_tags($row[$idColumn]));
-            if(strpos($id, '@')) {
-                // This is an email address
-                $recipient = $members->query(['email' => $id, 'semester'=>$semesterId, 'sectionId'=>$sectionId]);
-            } else {
-                // Assume this is an ID
-                $recipient = $members->query(['userUser' => $id, 'semester'=>$semesterId, 'sectionId'=>$sectionId]);
-            }
-
-            if(count($recipient) < 1) {
+            if(count($recipients) < 1) {
                 // User was not found
                 continue;
             }
 
-            $recipient = $recipient[0];
-            $usersCnt++;
+            foreach($recipients as $recipient) {
+                $usersCnt++;
 
-            foreach($mapping as $gradeTag => $column) {
-                if(!isset($row[$column])) {
-                    continue;
+                foreach($mapping as $gradeTag => $column) {
+                    if(!isset($row[$column])) {
+                        continue;
+                    }
+
+                    $points = intval(round($row[$column]));
+                    $grade = $grades->get($recipient, $assignTag, $gradeTag);
+
+                    $comment = '';
+                    if(isset($commentMapping[$gradeTag]) && isset($row[$commentMapping[$gradeTag]])) {
+                        $comment = $row[$commentMapping[$gradeTag]];
+                        $comment = str_replace("\\n", "\n", $comment);
+                    }
+
+                    $grade->set($user, $points, $comment, $time);
+                    $grades->post($recipient, $grade);
+
+                    $gradesCnt++;
                 }
-
-                $points = intval(round($row[$column]));
-                $grade = $grades->get($recipient, $assignTag, $gradeTag);
-
-                $comment = '';
-                if(isset($commentMapping[$gradeTag]) && isset($row[$commentMapping[$gradeTag]])) {
-                    $comment = $row[$commentMapping[$gradeTag]];
-                    $comment = str_replace("\\n", "\n", $comment);
-                }
-
-                $grade->set($user, $points, $comment, $time);
-                $grades->post($recipient, $grade);
-
-                $gradesCnt++;
             }
+
         }
 
 		$json = new JsonAPI();
