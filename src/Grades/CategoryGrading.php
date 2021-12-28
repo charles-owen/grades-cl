@@ -15,6 +15,7 @@ use CL\Users\User;
  * @property int points
  * @property int dropLowest
  * @property AssignmentCategory category
+ * @property boolean normalize If true (default), grade distribution is normalized
  * @endcond
  */
 class CategoryGrading {
@@ -77,6 +78,10 @@ class CategoryGrading {
 			case 'points':
 				$this->points = $value;
 				break;
+
+            case 'normalize':
+                $this->normalize = $value;
+                break;
 
 			default:
 				$trace = debug_backtrace();
@@ -179,7 +184,7 @@ class CategoryGrading {
 		}
 
 		// Correct for any dropped assignments (missing percentages)
-		if($points != 0) {
+		if($this->normalize && $points != 0) {
 			$total /= $points;
 		}
 
@@ -207,6 +212,7 @@ class CategoryGrading {
 	}
 
 	private $dropLowest = 0;
-	private $points = 0;        ///< Points assigned to the category
-	private $category = null;   ///< AssignmentCategory object
+	private $points = 0;        // Points assigned to the category
+	private $category = null;   // AssignmentCategory object
+    private $normalize = true;  // Normalize the grades
 }
