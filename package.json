@@ -15,7 +15,7 @@
   "dependencies": {
     "console-cl": ">=0.0.1",
     "course-cl": ">=0.0.1",
-    "dompurify": "^2.3.4",
+    "dompurify": "^2.3.6",
     "site-cl": ">=0.0.1",
     "users-cl": ">=0.0.1",
     "vue": "^2.6.14"
