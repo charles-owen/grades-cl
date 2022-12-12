@@ -260,7 +260,7 @@
 					return;
 				}
 
-				// Find the item this does with
+				// Find the item this goes with
 				const tag = element.dataset.tag;
                 for(let item of this.graders) {
                   if(item.tag === tag) {

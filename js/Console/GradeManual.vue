@@ -26,6 +26,7 @@
     export default {
         props: ['item'],
         mounted() {
+          this.item.manual.comment = this.deentitize(this.item.manual.comment)
         },
         methods: {
             fillInPoints() {
@@ -66,6 +67,14 @@
                         this.item.manual.points = pos;
                     }
                 }
+            },
+            deentitize(html) {
+              var ret = html.replace(/&gt;/g, '>');
+              ret = ret.replace(/&lt;/g, '<');
+              ret = ret.replace(/&quot;/g, '"');
+              ret = ret.replace(/&apos;/g, "'");
+              ret = ret.replace(/&amp;/g, '&');
+              return ret;
             }
         }
 
