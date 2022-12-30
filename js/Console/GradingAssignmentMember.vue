@@ -111,7 +111,7 @@
 				this.assignment = user.member.getAssignment(this.$store, this.assigntag);
 				this.setTitle(': ' + user.name + ' ' + this.assignment.shortname + ' Grading');
 				if (this.assignment.review === true) {
-					this.reviewing = this.$site.console.Review.reviewsbyfor;
+					this.reviewing = this.$root.console.Review.reviewsbyfor;
 				}
 
 				this.$site.api.get(`/api/grade/grader/${this.assigntag}/${this.memberid}`, {})
