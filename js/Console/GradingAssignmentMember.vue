@@ -37,7 +37,7 @@
 
               <!-- Submissions -->
               <submissions :user="fetcher.user" :assigntag="assigntag"></submissions>
-              <component v-if="reviewing !== null" :is="reviewing" :assigntag="assigntag" :user="fetcher.user"></component>
+              <component v-if="reviewing !== null" :is="toRaw(reviewing)" :assigntag="assigntag" :user="fetcher.user"></component>
               <div class="grade">
                 <p v-if="grade !== null">Computed Grade: {{grade}}</p>
                 <template v-else>
@@ -57,237 +57,240 @@
 </template>
 
 <script>
-	import GradeHistoryComponentVue from '../Util/GradeHistoryComponent.vue';
-	import HandbookVue from '../Handbook/Handbook.vue';
-	import GradeManualVue from './GradeManual.vue';
+import GradeHistoryComponentVue from '../Util/GradeHistoryComponent.vue'
+import HandbookVue from '../Handbook/Handbook.vue'
+import GradeManualVue from './GradeManual.vue'
+import { toRaw } from 'vue'
 
-	const ConsoleComponentBase = Site.ConsoleComponentBase;
-	const PrevNextMemberVue = Site.PrevNextMemberVue;
-	const MemberFetcherComponentVue = Site.MemberFetcherComponentVue;
-	const SubmissionsAssignmentMemberComponentVue = Site.SubmissionsAssignmentMemberComponentVue;
+const ConsoleComponentBase = Site.ConsoleComponentBase;
+const PrevNextMemberVue = Site.PrevNextMemberVue;
+const MemberFetcherComponentVue = Site.MemberFetcherComponentVue;
+const SubmissionsAssignmentMemberComponentVue = Site.SubmissionsAssignmentMemberComponentVue;
 
-	/**
-	 * /cl/console/grading/:assignment/:memberid
-	 * Assignment grading page for a course member
-   * @constructor GradingAssignmentMemberVue
-	 */
-	export default {
-		'extends': ConsoleComponentBase,
-		props: ['assigntag', 'memberid'],
-		data: function () {
-			return {
-				gradingLink: '/cl/console/grading/' + this.assigntag,
-				assignment: null,
-				graders: [],
-				grade: null,
-				due: null,
-				handbookResult: null,
-				reviewing: null
-			}
-		},
-		components: {
-			memberFetcher: MemberFetcherComponentVue,
-			prevNext: PrevNextMemberVue,
-			gradeHistory: GradeHistoryComponentVue,
-			submissions: SubmissionsAssignmentMemberComponentVue,
-			handbook: HandbookVue,
-          gradeManual: GradeManualVue
-		},
-		mounted() {
-			this.setTitle(': Grading');
-			this.addNav2('Submit', 2, () => {
-				this.submit();
-			});
+/**
+ * /cl/console/grading/:assignment/:memberid
+ * Assignment grading page for a course member
+ * @constructor GradingAssignmentMemberVue
+ */
+export default {
+  'extends': ConsoleComponentBase,
+  props: ['assigntag', 'memberid'],
+  data: function () {
+    return {
+      gradingLink: '/cl/console/grading/' + this.assigntag,
+      assignment: null,
+      graders: [],
+      grade: null,
+      due: null,
+      handbookResult: null,
+      reviewing: null
+    }
+  },
+  components: {
+    memberFetcher: MemberFetcherComponentVue,
+    prevNext: PrevNextMemberVue,
+    gradeHistory: GradeHistoryComponentVue,
+    submissions: SubmissionsAssignmentMemberComponentVue,
+    handbook: HandbookVue,
+    gradeManual: GradeManualVue
+  },
+  mounted() {
+    this.setTitle(': Grading');
+    this.addNav2('Submit', 2, () => {
+      this.submit();
+    });
 
-			this.addNav2('Submit and Exit', 3, () => {
-				this.submit(true);
-			});
+    this.addNav2('Submit and Exit', 3, () => {
+      this.submit(true);
+    });
 
-			this.addNav2Link('Exit', 4, '/cl/console/grading/' + this.assigntag);
-		},
-		methods: {
-			fetched(user) {
-				let section = user.member.getSection(this.$store);
-				this.assignment = user.member.getAssignment(this.$store, this.assigntag);
-				this.setTitle(': ' + user.name + ' ' + this.assignment.shortname + ' Grading');
-				if (this.assignment.review === true) {
-					this.reviewing = this.$root.console.Review.reviewsbyfor;
-				}
+    this.addNav2Link('Exit', 4, '/cl/console/grading/' + this.assigntag);
+  },
+  methods: {
+    fetched(user) {
+      let section = user.member.getSection(this.$store);
+      this.assignment = user.member.getAssignment(this.$store, this.assigntag);
+      this.setTitle(': ' + user.name + ' ' + this.assignment.shortname + ' Grading');
+      if (this.assignment.review === true) {
+        this.reviewing = this.$root.console.Review.reviewsbyfor;
+      }
 
-				this.$site.api.get(`/api/grade/grader/${this.assigntag}/${this.memberid}`, {})
-					.then((response) => {
-						if (!response.hasError()) {
-							this.take(response);
-						} else {
-							this.$site.toast(this, response);
-						}
+      this.$site.api.get(`/api/grade/grader/${this.assigntag}/${this.memberid}`, {})
+          .then((response) => {
+            if (!response.hasError()) {
+              this.take(response);
+            } else {
+              this.$site.toast(this, response);
+            }
 
-					})
-					.catch((error) => {
-						this.$site.toast(this, error);
-					});
-
-
-			},
-			submit(exit, callback) {
-				const form = this.$refs['form'];
-				const formData = new FormData(form);
-				if (this.handbookResult !== null) {
-					formData.append('_handbook', JSON.stringify(this.handbookResult));
-				}
-
-				this.$site.api.post(`/api/grade/grader/${this.assigntag}/${this.memberid}`, formData)
-					.then((response) => {
-						if (!response.hasError()) {
-							this.take(response);
-
-							if (exit) {
-								this.$router.push(this.$site.root + '/cl/console/grading/' + this.assigntag);
-							}
-
-							if(callback !== undefined) {
-							  callback();
-                            }
-						} else {
-							this.$site.toast(this, response);
-						}
-
-					})
-					.catch((error) => {
-						this.$site.toast(this, error);
-					});
-			},
-            /**
-             * Distribute grade item to all members of a team.
-             * @param item
-             */
-            teamDistribute(item) {
-			    this.submit(false, () => {
-			      const data = {
-                      teaming: item.teaming,
-                      gradeTag: item.tag
-                  };
-
-                  this.$site.api.post(`/api/team/distribute/${this.assigntag}/${this.memberid}`, data)
-                          .then((response) => {
-                            if (!response.hasError()) {
+          })
+          .catch((error) => {
+            this.$site.toast(this, error);
+          });
 
 
-                            } else {
-                              this.$site.toast(this, response);
-                            }
+    },
+    submit(exit, callback) {
+      const form = this.$refs['form'];
+      const formData = new FormData(form);
+      if (this.handbookResult !== null) {
+        formData.append('_handbook', JSON.stringify(this.handbookResult));
+      }
 
-                          })
-                          .catch((error) => {
-                            this.$site.toast(this, error);
-                          });
-                });
+      this.$site.api.post(`/api/grade/grader/${this.assigntag}/${this.memberid}`, formData)
+          .then((response) => {
+            if (!response.hasError()) {
+              this.take(response);
 
-            },
-			take(response) {
-                // Is there an existing locked grader?
-                let locked = null;
-                for(let i=0; i<this.graders.length; i++) {
-                  if(this.graders[i].locked) {
-                    locked = i;
-                    break;
-                  }
-                }
-
-				const grader = response.getData('grader');
-				this.due = grader.attributes.due !== undefined ? grader.attributes.due : null;
-
-                for(const grader of grader.attributes.graders) {
-                  grader.locked = false;
-                }
-
-				this.graders = grader.attributes.graders;
-				this.grade = grader.attributes.grade;
-
-				if(locked !== null) {
-				    this.graders[locked].locked = true;
-                }
-
-				this.$forceUpdate();
-				this.$nextTick(() => {
-					this.installRubricClickers();
-					this.$site.message('cl-grades-grader-installed');
-				});
-
-
-			},
-            lock(item) {
-              if(item.locked) {
-                item.locked = false;
-              } else {
-                for(const grader of this.graders) {
-                  grader.locked = false;
-                }
-
-                item.locked = true;
+              if (exit) {
+                this.$router.push(this.$site.root + '/cl/console/grading/' + this.assigntag);
               }
-            },
-			/// Install clickers for Rubric items that will autofill them.
-			installRubricClickers() {
-				const selectors = ['div.cl-clickable li.item', 'div.cl-clickable ul.items li', 'div.cl-clickable p.item'];
-				for (const selector of selectors) {
-					const clickables = document.querySelectorAll(selector);
-					for (let element of clickables) {
-						if (element.dataset.clickable === undefined) {
-							element.addEventListener('click', () => {
-								this.addContent(element);
-							});
-							element.setAttribute('data-clickable', 'yes');
-						}
-					}
-				}
-			},
-			/// Add rubric content to the element comment textarea
-			addContent(element) {
-				const content = element.textContent;
 
-				// Work up until we find the cl-grader-item div
-				element = element.parentNode;
-				while (element !== null) {
-					if (element.classList.contains('cl-grader-item')) {
-						break;
-					}
+              if (callback !== undefined) {
+                callback();
+              }
+            } else {
+              this.$site.toast(this, response);
+            }
 
-					element = element.parentNode;
-				}
+          })
+          .catch((error) => {
+            this.$site.toast(this, error);
+          });
+    },
+    /**
+     * Distribute grade item to all members of a team.
+     * @param item
+     */
+    teamDistribute(item) {
+      this.submit(false, () => {
+        const data = {
+          teaming: item.teaming,
+          gradeTag: item.tag
+        };
 
-				if (element === null) {
-					return;
-				}
+        this.$site.api.post(`/api/team/distribute/${this.assigntag}/${this.memberid}`, data)
+            .then((response) => {
+              if (!response.hasError()) {
 
-				// Find the item this goes with
-				const tag = element.dataset.tag;
-                for(let item of this.graders) {
-                  if(item.tag === tag) {
-                    if(item.manual !== undefined) {
-                      if(item.manual.comment.length > 0 && item.manual.comment.match(/\n$/) === null) {
-                        item.manual.comment += "\n";
-                      }
-                      item.manual.comment += content;
-                    }
-                    break;
-                  }
-                }
 
-				// Find a textarea inside this
-				for (let textarea of element.querySelectorAll('textarea')) {
-					textarea.value = textarea.value + content + "\n";
-				}
-			},
-			time(t) {
-				return this.$site.TimeFormatter.absoluteUNIX(t, 'short');
-			},
-			email(user) {
-				window.location = 'mailto:' + user.email;
-			},
-			handbookData(data) {
-				this.handbookResult = data;
-			}
-		}
-	}
+              } else {
+                this.$site.toast(this, response);
+              }
+
+            })
+            .catch((error) => {
+              this.$site.toast(this, error);
+            });
+      });
+    },
+    take(response) {
+      // Is there an existing locked grader?
+      let locked = null;
+      for (let i = 0; i < this.graders.length; i++) {
+        if (this.graders[i].locked) {
+          locked = i;
+          break;
+        }
+      }
+
+      const grader = response.getData('grader');
+      this.due = grader.attributes.due !== undefined ? grader.attributes.due : null;
+
+      for (const grader of grader.attributes.graders) {
+        grader.locked = false;
+      }
+
+      this.graders = grader.attributes.graders;
+      this.grade = grader.attributes.grade;
+
+      if (locked !== null) {
+        this.graders[locked].locked = true;
+      }
+
+      this.$forceUpdate();
+      this.$nextTick(() => {
+        this.installRubricClickers();
+        this.$site.message('cl-grades-grader-installed');
+      });
+
+
+    },
+    lock(item) {
+      if (item.locked) {
+        item.locked = false;
+      } else {
+        for (const grader of this.graders) {
+          grader.locked = false;
+        }
+
+        item.locked = true;
+      }
+    },
+    /// Install clickers for Rubric items that will autofill them.
+    installRubricClickers() {
+      const selectors = ['div.cl-clickable li.item', 'div.cl-clickable ul.items li', 'div.cl-clickable p.item'];
+      for (const selector of selectors) {
+        const clickables = document.querySelectorAll(selector);
+        for (let element of clickables) {
+          if (element.dataset.clickable === undefined) {
+            element.addEventListener('click', () => {
+              this.addContent(element);
+            });
+            element.setAttribute('data-clickable', 'yes');
+          }
+        }
+      }
+    },
+    /// Add rubric content to the element comment textarea
+    addContent(element) {
+      const content = element.textContent;
+
+      // Work up until we find the cl-grader-item div
+      element = element.parentNode;
+      while (element !== null) {
+        if (element.classList.contains('cl-grader-item')) {
+          break;
+        }
+
+        element = element.parentNode;
+      }
+
+      if (element === null) {
+        return;
+      }
+
+      // Find the item this goes with
+      const tag = element.dataset.tag;
+      for (let item of this.graders) {
+        if (item.tag === tag) {
+          if (item.manual !== undefined) {
+            if (item.manual.comment.length > 0 && item.manual.comment.match(/\n$/) === null) {
+              item.manual.comment += "\n";
+            }
+            item.manual.comment += content;
+          }
+          break;
+        }
+      }
+
+      // Find a textarea inside this
+      for (let textarea of element.querySelectorAll('textarea')) {
+        textarea.value = textarea.value + content + "\n";
+      }
+    },
+    time(t) {
+      return this.$site.TimeFormatter.absoluteUNIX(t, 'short');
+    },
+    email(user) {
+      window.location = 'mailto:' + user.email;
+    },
+    handbookData(data) {
+      this.handbookResult = data;
+    },
+    toRaw(c) {
+      return toRaw(c)
+    }
+  }
+}
 </script>
