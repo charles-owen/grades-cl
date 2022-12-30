@@ -2,7 +2,7 @@
   <div class="content cl-grader">
     <div class="full">
       <member-fetcher v-on:fetched="fetched" :id="memberid" :faillink="gradingLink">
-        <template slot-scope="fetcher">
+        <template v-slot="fetcher">
           <prev-next :user="fetcher.user"></prev-next>
           <div v-if="fetcher.user !== null">
 

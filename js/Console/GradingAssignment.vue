@@ -3,7 +3,7 @@
     <div class="full">
       <submissions-links :assignment="assignment"></submissions-links>
       <members-fetcher>
-        <template slot-scope="fetcher">
+        <template v-slot="fetcher">
           <table v-if="grades !== null" class="small">
             <tr class="vertical">
               <th>User</th>
@@ -81,7 +81,7 @@
       this.section = this.$store.getters['course/section'](member.semester, member.section);
       this.assignment = this.section.getAssignment(this.assigntag);
 
-      this.$parent.setTitle(': ' + this.assignment.shortname + ' Grading');
+      this.$root.setTitle(': ' + this.assignment.shortname + ' Grading');
 
       this.$site.api.get('/api/grade/grades/' + this.assigntag, {})
               .then((response) => {

@@ -42,7 +42,7 @@
 			handbook: HandbookVue
 		},
 		mounted() {
-			this.$parent.setTitle(':  ' + this.json.assignment.shortName + ' Grade for ' + this.user.displayName());
+			this.$root.setTitle(':  ' + this.json.assignment.shortName + ' Grade for ' + this.user.displayName());
 
 			const menu = [
 				{

@@ -2,7 +2,7 @@
   <div class="content">
     <div class="full">
       <members-fetcher>
-        <template slot-scope="fetcher">
+        <template v-slot="fetcher">
           <table class="small">
             <tr>
               <th>User</th>
@@ -43,7 +43,7 @@
 			'membersFetcher': MembersFetcherComponentVue
 		},
 		mounted() {
-			this.$parent.setTitle(': Grades');
+			this.$root.setTitle(': Grades');
 		}
 	}
 </script>

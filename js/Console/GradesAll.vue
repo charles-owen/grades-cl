@@ -2,7 +2,7 @@
   <div class="content">
     <div class="full">
       <members-fetcher>
-        <template slot-scope="fetcher">
+        <template v-slot="fetcher">
           <table class="small">
             <tr class="vertical">
               <th>User</th>
@@ -60,7 +60,7 @@
 			this.section = this.$store.getters['course/section'](member.semester, member.section);
 		},
 		mounted() {
-			this.$parent.setTitle(': Grades');
+			this.$root.setTitle(': Grades');
 
 			this.$site.api.get('/api/grade/all', {})
 				.then((response) => {

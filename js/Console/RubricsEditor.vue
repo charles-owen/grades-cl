@@ -54,7 +54,7 @@
 			rubricEditor: RubricEditorVue
 		},
 		created() {
-			this.$parent.setTitle(': Assignment Grading');
+			this.$root.setTitle(': Assignment Grading');
 			this.timer = null;
 
 			let user = this.$store.state.user.user;
@@ -63,7 +63,7 @@
 			this.section = this.$store.getters['course/section'](member.semester, member.section);
 			this.assignment = this.section.getAssignment(this.assigntag);
 
-			this.$parent.setTitle(': ' + this.assignment.shortname + ' Rubrics');
+			this.$root.setTitle(': ' + this.assignment.shortname + ' Rubrics');
 
 			this.$site.api.get('/api/grade/rubrics/' + this.assignment.tag, {})
 				.then((response) => {

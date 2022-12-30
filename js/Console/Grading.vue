@@ -47,7 +47,7 @@
 
         },
         created() {
-            this.$parent.setTitle(': Assignment Grading');
+            this.$root.setTitle(': Assignment Grading');
 
             let user = this.$store.state.user.user;
             let member = user.member;
