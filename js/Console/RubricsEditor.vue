@@ -70,7 +70,7 @@
 					if (!response.hasError()) {
 						this.rubrics = response.getData('rubrics').attributes;
 						for (let rubric of this.rubrics) {
-							this.$set(rubric, 'show', rubric.rubric);
+              rubric['show'] = rubric.rubric
 						}
 					} else {
 						this.$site.toast(this, response);

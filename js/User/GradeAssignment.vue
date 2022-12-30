@@ -4,7 +4,7 @@
       <div class="cl-autoback"></div>
       <p class="cl-title">{{json.assignment.name}}</p>
       <p v-if="json.dispute !== null" class="cl-dispute">Please direct all grading issues to <span v-html="json.dispute"></span></p>
-      <div v-for="item in json.grades" v-if="item.html !== undefined">
+      <div v-for="item in grades">
         <h2>{{item.name}}</h2>
         <div v-if="item.handbook === undefined" v-html="item.html"></div>
         <handbook v-else :item="item" readonly="true"></handbook>
@@ -41,6 +41,13 @@
 			gradeHistory: GradeHistoryComponent,
 			handbook: HandbookVue
 		},
+    computed: {
+      grades() {
+        return this.json.grades.filter((item) => {
+          return item.html !== undefined
+        })
+      }
+    },
 		mounted() {
 			this.$root.setTitle(':  ' + this.json.assignment.shortName + ' Grade for ' + this.user.displayName());
 

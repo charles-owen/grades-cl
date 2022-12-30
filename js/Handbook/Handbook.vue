@@ -51,6 +51,7 @@
 			item: {default: {}},
 			readonly: {default: false}
 		},
+    emit: ['handbook-data'],
 		watch: {
 			item: function (value) {
 				this.take();
@@ -74,7 +75,7 @@
 						catPoints = 0;
 					}
 
-					this.$set(this.metadata, category.tag, catPoints);
+          this.metadata[category.tag] = catPoints
 				}
 
 				let catPoints = this.item.metadata['_manual'];
@@ -82,19 +83,21 @@
 					catPoints = 0;
 				}
 
-				this.$set(this.metadata, '_manual', catPoints);
+        this.metadata['_manual'] = catPoints
 
 				let manualText = this.item.metadata['_manual_text'];
 				if (manualText === undefined) {
 					manualText = '';
 				}
-				this.$set(this.metadata, '_manual_text', manualText);
+
+        this.metadata['_manual_text'] = manualText
 
 				let comment = this.item.metadata['_comment'];
 				if (comment === undefined) {
 					comment = '';
 				}
-				this.$set(this.metadata, '_comment', comment);
+
+        this.metadata['_comment'] = comment
 
 				this.compute();
 			},
