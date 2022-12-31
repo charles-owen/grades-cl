@@ -116,7 +116,7 @@ class GradesPlugin extends \CL\Site\Plugin {
 		} else if($object instanceof AssignmentCategory) {
 			$object->grading = new CategoryGrading();
 		} else if($object instanceof ConsoleView) {
-			$object->addJS('grades');
+			$object->addJS('gradesconsole');
 		}
 	}
 

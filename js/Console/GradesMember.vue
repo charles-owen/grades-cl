@@ -5,6 +5,14 @@
         <template v-slot="fetcher">
           <prev-next :user="fetcher.user"></prev-next>
           <div v-if="fetcher.user !== null && grade !== null">
+            <p :class="fetcher.user.role() === 'T' ? 'cl-role' : 'cl-role cl-role-staff'">
+              {{fetcher.user.roleName()}}: {{fetcher.user.name}}
+              <em class="small">{{fetcher.user.userId}}</em>&nbsp;
+              <button class="cl-grader-button" @click.prevent="email(fetcher.user)">
+                email {{fetcher.user.roleName().toLowerCase()}}
+              </button>&nbsp;
+            </p>
+
             <table>
               <tr>
                 <th>Assignment</th><th>&nbsp;</th><th>Grade</th><th>&nbsp;</th><th>Grade</th>

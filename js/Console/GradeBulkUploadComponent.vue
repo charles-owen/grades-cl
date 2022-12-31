@@ -19,7 +19,8 @@
 </template>
 
 <script>
-  import GradesUploadColumnChooserComponent from './GradesUploadColumnChooser.vue';
+  import GradesUploadColumnChooserComponent from './GradesUploadColumnChooser.vue'
+  const VueHelper = Site.VueHelper
 
   export default {
     props: ['assigntag', 'parts'],
@@ -143,8 +144,7 @@
           });
 
           // Create a Vue inside the dialog box
-          new site.Vue({
-            el: '#cl-column-chooser',
+          const app = VueHelper.createApp({
             data: function () {
               return {
                 parts: parts,
@@ -161,6 +161,8 @@
             }
           })
 
+          app.config.globalProperties.$site = this.$site
+          app.mount('#cl-column-chooser')
         };
 
         reader.onerror = function (e) {

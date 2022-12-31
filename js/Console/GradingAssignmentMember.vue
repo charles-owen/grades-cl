@@ -8,13 +8,14 @@
 
             <form ref="form" method="post" @submit.prevent="submit">
               <p :class="fetcher.user.role() === 'T' ? 'cl-role' : 'cl-role cl-role-staff'">
-                {{fetcher.user.roleName()}}: {{fetcher.user.name}} {{fetcher.user.role()}}
-                <em class="small">{{fetcher.user.userId}}</em>
+                {{fetcher.user.roleName()}}: {{fetcher.user.name}}
+                <em class="small">{{fetcher.user.userId}}</em>&nbsp;
                 <button class="cl-grader-button" @click.prevent="email(fetcher.user)">
                   email {{fetcher.user.roleName().toLowerCase()}}
+                </button>&nbsp;
+                <button class="cl-grader-button" @click.prevent="$router.push(root + '/cl/console/grades/' + fetcher.user.member.id)">
+                  student grades
                 </button>
-                <router-link class="cl-grader-button" tag="button" :to="root + '/cl/console/grades/' + fetcher.user.member.id">student grades
-                </router-link>
               </p>
               <p class="cl-due" v-if="due !== null">Assignment due {{time(due)}} </p>
 
