@@ -19,65 +19,77 @@
 
 <script>
 
-    /**
-     * Manual grade entry form.
-     * @constructor GradeManualVue
-     */
-    export default {
-        props: ['item'],
-        mounted() {
+/**
+ * Manual grade entry form.
+ * @constructor GradeManualVue
+ */
+export default {
+  props: ['item'],
+  mounted() {
+    this.item.manual.comment = this.deentitize(this.item.manual.comment)
+  },
+  watch:
+      {
+        item(to, fm) {
           this.item.manual.comment = this.deentitize(this.item.manual.comment)
-        },
-        methods: {
-            fillInPoints() {
-                this.item.manual.points = this.item.manual.available;
-            },
-            compute() {
-                const lines = this.item.manual.comment.split(/\r?\n/);
-
-                let pos = 0;
-                let neg = 0;
-                for(let line of lines) {
-                    const tokens = line.match(/^\s*([+-]?)([1-9][0-9]*)([^0-9]|$)/);
-                    if(tokens !== null) {
-                        if(tokens[1] === '-') {
-                            neg -= +tokens[2];
-                        } else {
-                            pos += +tokens[2];
-                        }
-                    }
-                }
-
-                /*
-                 * If we only have negative values, that is subtracted from
-                 * the available points. If we only have positive values, they
-                 * are added to make up the points. If we have both, the values
-                 * are all added together to make up the total points.
-                 */
-                if(neg !== 0) {
-                    if(pos === 0) {
-                        this.item.manual.points = this.item.manual.available + neg;
-                    } else {
-                        this.item.manual.points = pos + neg;
-                    }
-                } else {
-                    if(pos === 0) {
-                        this.item.manual.points = this.item.manual.available;
-                    } else {
-                        this.item.manual.points = pos;
-                    }
-                }
-            },
-            deentitize(html) {
-              var ret = html.replace(/&gt;/g, '>');
-              ret = ret.replace(/&lt;/g, '<');
-              ret = ret.replace(/&quot;/g, '"');
-              ret = ret.replace(/&apos;/g, "'");
-              ret = ret.replace(/&amp;/g, '&');
-              return ret;
-            }
         }
+      },
+  methods: {
+    fillInPoints() {
+      this.item.manual.points = this.item.manual.available;
+    },
+    compute() {
+      const lines = this.item.manual.comment.split(/\r?\n/);
 
+      let pos = 0;
+      let neg = 0;
+      for (let line of lines) {
+        const tokens = line.match(/^\s*([+-]?)([1-9][0-9]*)([^0-9]|$)/);
+        if (tokens !== null) {
+          if (tokens[1] === '-') {
+            neg -= +tokens[2];
+          } else {
+            pos += +tokens[2];
+          }
+        }
+      }
+
+      /*
+       * If we only have negative values, that is subtracted from
+       * the available points. If we only have positive values, they
+       * are added to make up the points. If we have both, the values
+       * are all added together to make up the total points.
+       */
+      if (neg !== 0) {
+        if (pos === 0) {
+          this.item.manual.points = this.item.manual.available + neg;
+        } else {
+          this.item.manual.points = pos + neg;
+        }
+      } else {
+        if (pos === 0) {
+          this.item.manual.points = this.item.manual.available;
+        } else {
+          this.item.manual.points = pos;
+        }
+      }
+    },
+    /**
+     * Remove the HTML entities when item is supplied.
+     * @param html HTML to remove the entities from
+     * @returns string with entities replaced
+     */
+    deentitize(html) {
+      var ret = html.replace(/&gt;/g, '>')
+          .replace(/&lt;/g, '<')
+          .replace(/&#039;/g, "'")
+          .replace(/&quot;/g, '"')
+          .replace(/&apos;/g, "'")
+          .replace(/&amp;/g, '&')
+      return ret
     }
+  }
+
+}
 
 </script>
