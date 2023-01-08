@@ -1,1 +1,4 @@
-{}
+{
+  "Grades.js": "/cl/dist/grades.dev.js",
+  "GradesConsole.js": "/cl/dist/gradesconsole.dev.js"
+}
