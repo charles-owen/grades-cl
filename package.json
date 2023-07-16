@@ -13,12 +13,12 @@
   "author": "Charles B. Owen",
   "license": "MIT",
   "dependencies": {
-    "@vue/compat": "^3.2.45",
+    "@vue/compat": "^3.3.4",
     "console-cl": ">=0.0.1",
     "course-cl": ">=0.0.1",
-    "dompurify": "^2.4.1",
+    "dompurify": "^3.0.5",
     "site-cl": ">=0.0.1",
     "users-cl": ">=0.0.1",
-    "vue": "^3.2.45"
+    "vue": "^3.3.4"
   }
 }
